@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AdminModule } from './admin/admin.module';
 import { PaymentsModule } from './payments/payments.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { PaymentsModule } from './payments/payments.module';
     CloudinaryModule,
     AdminModule,
     PaymentsModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}
