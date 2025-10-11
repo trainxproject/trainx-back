@@ -1,14 +1,16 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private readonly notificationService: NotificationsService
   ) {}
 
   // Registro: hashea password y crea usuario
@@ -24,6 +26,11 @@ export class AuthService {
     });
     // opcional: no devolver password
     delete (user as any).password;
+
+    await this.notificationService.sendWelcome({
+      email: user.email,
+      name: user.name
+    })
     return user;
   }
 
