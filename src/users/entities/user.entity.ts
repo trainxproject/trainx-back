@@ -23,10 +23,15 @@ export class User {
     @Column({ default: 'activo' })
     status: string;
 
+    @Column({default: false})
+    isAdmin: false
+
     @OneToOne(() => Subscription, (subscription) => subscription.user)
     subscription: Subscription;
 
     @OneToMany(() => Payment, (payment) => payment.user)
     payments: Payment[];
+
+  
 
 }
