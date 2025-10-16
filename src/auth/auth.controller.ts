@@ -5,38 +5,49 @@ import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import type { Response, Request } from 'express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Register a new user in the platform' })
+  @ApiBody({ description: 'User registration data', type: CreateUserDto })
+  @ApiResponse({ status: 201, description: 'Returns the newly created user.' })
   register(@Body() dto: CreateUserDto) {
     return this.authService.register(dto);
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Authenticate a user and return a JWT token' })
+  @ApiBody({ description: 'User login credentials', type: LoginDto })
+  @ApiResponse({ status: 200, description: 'Returns JWT token and user info if credentials are valid.' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto.email, dto.password);
   }
 
-  // Logout protegido (opcional): si querés que solo un usuario autenticado pueda "cerrar sesión" en el servidor
   @UseGuards(JwtAuthGuard)
   @Post('logout')
+  @ApiOperation({ summary: 'Logout the authenticated user' })
+  @ApiResponse({ status: 200, description: 'User successfully logged out.' })
   logout(@Req() req: Request) {
     return this.authService.logout();
   }
 
-   // 🔹 1. Redirige al usuario a la página de Google para iniciar sesión
-   @Get('google')
-   @UseGuards(GoogleAuthGuard)
-   async googleLogin() {
-     return { msg: 'Redirigiendo a Google...' };
-   }
- 
-   // 🔹 2. Google redirige acá después del login
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Redirect the user to Google for authentication' })
+  @ApiResponse({ status: 302, description: 'Redirects to Google login page.' })
+  async googleLogin() {
+    return { msg: 'Redirecting to Google...' };
+  }
+
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Handle the callback from Google after authentication' })
+  @ApiResponse({ status: 302, description: 'Redirects the user to frontend with JWT token.' })
   async googleCallback(@Req() req: Request, @Res() res: Response) {
     const user = req.user;
     const jwt = await this.authService.validateGoogleUser(user);
