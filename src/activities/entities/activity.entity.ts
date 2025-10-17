@@ -11,13 +11,16 @@ export class Activity {
     name: string;
 
     @Column({ nullable: true })
-    description: string;
+    description?: string;
 
     @Column({ default: false })
     requiresReservation: boolean;
 
     @Column({ nullable: true })
     maxCapacity: number;
+
+    @Column()
+    imageUrl: string;
 
     @OneToMany(() => Schedule, (schedule) => schedule.activity)
     schedules: Schedule[];

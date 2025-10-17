@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, BadRequestException } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
 
 @Controller('activities')
@@ -17,6 +17,11 @@ export class ActivitiesController {
 
     @Post()
     create(@Body() data: any) {
+
+        if (!data.imageUrl) {
+            throw new BadRequestException("'imageUrl' is required");
+        }
+
         return this.activitiesService.create(data);
     }
 }
