@@ -12,20 +12,20 @@ export class UsersService {
         private readonly cloudinaryService: CloudinaryService
     ) {}
 
-    findAll() {
-        return this.usersRepository.find();
+    async findAll(): Promise<User[]> {
+        return this.usersRepository.find({relations: ["subscription"]});
     }
 
-    findOne(id: string) {
+    async findOne(id: string) {
         return this.usersRepository.findOne({ where: { id } });
     }
 
-    create(user: Partial<User>) {
+    async create(user: Partial<User>) {
         const newUser = this.usersRepository.create(user);
         return this.usersRepository.save(newUser);
     }
 
-    remove(id: string) {
+    async remove(id: string) {
         return this.usersRepository.delete(id);
     }
 

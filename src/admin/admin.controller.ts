@@ -26,4 +26,9 @@ export class AdminController {
   getPayments(@Query('userId') userId?: string) {
     return this.adminService.getPayments(userId);
   }
+
+  @Get('statistics')
+  async getStatistics() {
+    return this.adminService.getStatistics();
+  }
 }
