@@ -2,11 +2,12 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany } from 'typ
 import { Subscription } from '../../suscriptions/entities/subscription.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { Payment } from '../../payments/entities/payment.entity';
+import { Reservation } from '../../reservations/entities/reservation.entity';
 
 @Entity()
 export class User {
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    id: string = uuidv4();
 
     @Column()
     name: string;
@@ -25,6 +26,9 @@ export class User {
 
     @OneToOne(() => Subscription, (subscription) => subscription.user)
     subscription: Subscription;
+
+    @OneToMany(() => Reservation, (reservation) => reservation.user)
+    reservations: Reservation[];
 
     @OneToMany(() => Payment, (payment) => payment.user)
     payments: Payment[];

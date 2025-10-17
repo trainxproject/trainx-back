@@ -8,7 +8,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
-import { NotificationsModule } from 'src/notifications/notifications.module';
+//import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -22,7 +22,7 @@ import { NotificationsModule } from 'src/notifications/notifications.module';
         signOptions: { expiresIn: config.get<string | number>('JWT_EXPIRATION') || '1h' },
       }),
     }),
-    NotificationsModule
+    //NotificationsModule
   ],
   providers: [AuthService, JwtStrategy, GoogleStrategy, GoogleAuthGuard],
   controllers: [AuthController],

@@ -1,10 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity()
 export class Payment {
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    id: string = uuidv4();
 
     @ManyToOne(() => User, (user) => user.payments, { onDelete: 'CASCADE' })
     user: User;

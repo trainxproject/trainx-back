@@ -7,7 +7,10 @@ import { AuthModule } from './auth/auth.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AdminModule } from './admin/admin.module';
 import { PaymentsModule } from './payments/payments.module';
-import { NotificationsModule } from './notifications/notifications.module';
+//import { NotificationsModule } from './notifications/notifications.module';
+import { ActivitiesModule } from './activities/activities.module';
+import { SchedulesModule } from './schedules/schedules.module';
+import { ReservationsModule } from './reservations/reservations.module';
 
 @Module({
   imports: [
@@ -34,7 +37,10 @@ import { NotificationsModule } from './notifications/notifications.module';
     CloudinaryModule,
     AdminModule,
     PaymentsModule,
-    NotificationsModule,
+    //NotificationsModule,
+    ActivitiesModule,
+    SchedulesModule,
+    ReservationsModule,
   ],
 })
 export class AppModule {}

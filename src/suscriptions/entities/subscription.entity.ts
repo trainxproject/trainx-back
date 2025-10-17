@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 @Entity()
 export class Subscription {
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    id: string = uuidv4();
 
     @Column()
     startDate: Date;
@@ -18,6 +18,13 @@ export class Subscription {
 
     @Column({ type: 'decimal', precision: 10, scale: 2, default: 10000.00 })
     amount: number;
+
+    @Column({
+        type: 'enum',
+        enum: ['3_days', '5_days'],
+        default: '3_days',
+    })
+    type: '3_days' | '5_days';
 
     @OneToOne(() => User, (user) => user.subscription, { onDelete: 'CASCADE' })
     @JoinColumn()
