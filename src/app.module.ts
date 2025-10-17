@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { SubscriptionsModule } from './suscriptions/subscriptions.module';
@@ -8,6 +8,9 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AdminModule } from './admin/admin.module';
 import { PaymentsModule } from './payments/payments.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { PlanSeeder } from './plans/plan.seeder';
+import { PlanModule } from './plans/plan.module';
+
 
 @Module({
   imports: [
@@ -35,6 +38,17 @@ import { NotificationsModule } from './notifications/notifications.module';
     AdminModule,
     PaymentsModule,
     NotificationsModule,
+    PlanModule
   ],
 })
-export class AppModule {}
+export class AppModule implements OnApplicationBootstrap {
+ 
+  
+
+  
+  constructor(private readonly plans: PlanSeeder){}
+  async onApplicationBootstrap() {
+   await this.plans.run()
+
+  }
+}

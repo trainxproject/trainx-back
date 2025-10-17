@@ -1,4 +1,4 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { SendEmailDto } from './dto/sendEmail.dto';
@@ -22,10 +22,14 @@ export class NotificationsService {
       auth: { user, pass },
     });
 
-    this.transporter.verify()
+    setTimeout(()=>{
+      this.transporter.verify()
       .then(() => this.logger.log('✅ Mail transporter ready'))
       .catch(err => this.logger.error('❌ Mail transporter verification failed', err));
+    })
+    
   }
+
 
   private buildWelcomeMessage(dto: SendEmailDto) {
     const { name } = dto;

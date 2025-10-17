@@ -1,4 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Plan } from "./plan.entity";
+import { partialDto, planDto } from "./plan.dto";
+import { Repository } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
+import { PlansStatus } from "src/plans.enum";
+import { User } from "src/users/entities/user.entity";
+
 
 
 
@@ -7,17 +14,65 @@ import { Injectable } from "@nestjs/common";
 
 
 export class PlanService {
-    delete() {
-        throw new Error("Method not implemented.");
+    
+    constructor(
+        @InjectRepository(Plan)
+        private readonly planRepo: Repository<Plan>,
+        @InjectRepository(User)
+        private readonly userRepo: Repository<User>
+    ){}
+
+    async view(){
+        return await this.planRepo.find()
     }
-    modify() {
-        throw new Error("Method not implemented.");
+
+    async create(dto: planDto, id: string){
+        const admin = await this.userRepo.findOne({where: {id: id}})
+        if(admin?.isAdmin === false) throw new BadRequestException("Sorry, you don't have the necessary permissions.")
+
+        const createPlan = this.planRepo.create({
+                ...dto,
+                status: PlansStatus.ACTIVE
+            })
+        
+        return createPlan
+
     }
-    create() {
-        throw new Error("Method not implemented.");
+    async modify(plan: partialDto, userId: string, planId: string){
+        const admin = await this.userRepo.findOne({where: {id: userId}})
+        if(admin?.isAdmin === false) throw new BadRequestException("Sorry, you don't have the necessary permissions.")
+
+        const searchPlan = await this.planRepo.findOne({where: {id: planId}})
+        if(!searchPlan) throw new NotFoundException("Plan not found.")
+
+        const modify = await this.planRepo.merge(searchPlan, plan)
+
+        return modify;
     }
-    view() {
-        throw new Error("Method not implemented.");
+
+
+    async delete(userId: any, id: string){
+        const admin = await this.userRepo.findOne({where: {id: userId}})
+        if(admin?.isAdmin === false) throw new BadRequestException("Sorry, you don't have the necessary permissions.")
+
+        const searchPlan = await this.planRepo.findOne({where: {id: id}})
+        if(!searchPlan) throw new NotFoundException("Plan not found.")
+         
+        return await this.planRepo.delete(searchPlan); 
+    }
+
+    async status(id: string, userId:string){
+        const admin = await this.userRepo.findOne({where: {id: userId}})
+        if(admin?.isAdmin === false) throw new BadRequestException("Sorry, you don't have the necessary permissions.")
+
+        const searchPlan = await this.planRepo.findOne({where: {id: id}})
+        if(!searchPlan) throw new NotFoundException("Plan not found.")
+
+        const newStatus = searchPlan.status === PlansStatus.ACTIVE ? PlansStatus.SUSPENDED : PlansStatus.ACTIVE
+
+        await this.planRepo.update({id: searchPlan.id}, {status: newStatus})
+        
+        return await this.planRepo.findOne({where: {id: id}})
     }
 
 

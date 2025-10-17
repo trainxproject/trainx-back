@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { PlansStatus } from "src/plans.enum";
 
 
 
@@ -14,6 +15,9 @@ export class Plan {
     @Column()
     name: string
 
+    @Column()
+    type: string
+
     @Column({type: "numeric", precision:10, scale: 2 , default: 0})
     price: number;
 
@@ -21,6 +25,13 @@ export class Plan {
     currency: string
 
     @Column({length: 50})
-    description: string
+    features: string
+
+    @Column({
+        type: "enum",
+        enum: PlansStatus,
+        default: PlansStatus.ACTIVE
+    })
+    status: PlansStatus
 
 }
