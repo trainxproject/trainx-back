@@ -16,8 +16,8 @@ export class Activity {
     @Column({ default: false })
     requiresReservation: boolean;
 
-    @Column({ nullable: true })
-    maxCapacity: number;
+    @Column({ type:"int" ,nullable: true })
+    maxCapacity?: number | null;
 
     @Column()
     imageUrl: string;

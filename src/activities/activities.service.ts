@@ -21,6 +21,10 @@ export class ActivitiesService {
         });
     }
 
+    findByName(name: string) {
+        return this.activityRepository.findOne({ where: { name } });
+    }
+
     create(data: Partial<Activity>) {
         const activity = this.activityRepository.create(data);
         return this.activityRepository.save(activity);
