@@ -13,7 +13,7 @@ async function bootstrap() {
   ngrok.authtoken(process.env.NGROK_AUTHTOKEN as string)
   .then(()=> ngrok.connect(3000))
   .then(url => console.log('🔄 Webhook URL para Mercado Pago:', url + '/webhooks/mercadopago'))
-  .catch(err => console.error('❌ Error ngrok:', err))
+  .catch(err => console.error('❌ Error ngrok'))
   
   const config = new DocumentBuilder()
     .setTitle('TRAIN-X')

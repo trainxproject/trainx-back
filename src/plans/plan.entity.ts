@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { PlansStatus } from "src/plans.enum";
+import { Pay } from "src/payments/entities/payment.entity";
 
 
 
@@ -33,5 +34,9 @@ export class Plan {
         default: PlansStatus.ACTIVE
     })
     status: PlansStatus
+
+    @OneToMany(()=> Pay, (pay)=> pay.plan)
+    payments: Pay[]
+
 
 }

@@ -10,6 +10,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PlanSeeder } from './plans/plan.seeder';
 import { PlanModule } from './plans/plan.module';
+import { MercadoPagoModule } from './mercadopago/mercado.module';
 
 
 @Module({
@@ -38,7 +39,8 @@ import { PlanModule } from './plans/plan.module';
     AdminModule,
     PaymentsModule,
     NotificationsModule,
-    PlanModule
+    PlanModule,
+    MercadoPagoModule
   ],
 })
 export class AppModule implements OnApplicationBootstrap {
