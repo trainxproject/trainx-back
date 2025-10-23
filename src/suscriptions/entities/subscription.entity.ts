@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { Payment } from "../../payments/entities/payment.entity";
 
 @Entity()
 export class Subscription {
@@ -29,4 +30,7 @@ export class Subscription {
     @OneToOne(() => User, (user) => user.subscription, { onDelete: 'CASCADE' })
     @JoinColumn()
     user: User;
+
+    @OneToMany(() => Payment, (payment) => payment.subscription)
+    payments: Payment[];
 }

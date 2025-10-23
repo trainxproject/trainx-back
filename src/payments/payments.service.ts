@@ -26,7 +26,15 @@ export class PaymentsService {
 
   async create(paymentData: Partial<Payment>): Promise<Payment> {
     const payment = this.paymentsRepository.create(paymentData);
-    return this.paymentsRepository.save(payment);
+    const saved = await this.paymentsRepository.save(payment);
+  
+    // Activar la suscripción si el pago ya está marcado como pagado
+    if (saved.paid && saved.subscription) {
+      saved.subscription.isActive = true;
+      await this.subscriptionsRepository.save(saved.subscription);
+    }
+  
+    return saved;
   }
 
   async markAsPaid(id: string): Promise<Payment> {
