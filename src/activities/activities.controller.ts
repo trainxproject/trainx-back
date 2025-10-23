@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Param, Body, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, BadRequestException, Put, Delete } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import * as path from 'path';
+import { UpdateActivityDto } from './dtos/update-activity.dto';
 
 @Controller('activities')
 export class ActivitiesController {
@@ -71,5 +72,17 @@ export class ActivitiesController {
     }
 
         return { message: 'Activities seeded successfully ✅' };
+    }
+
+    @Put(':id')
+    async update(@Param('id') id: string, @Body() body: UpdateActivityDto) {
+        if (!id) throw new BadRequestException('Debe proporcionar un ID válido');
+        return this.activitiesService.updateActivity(id, body);
+    }
+    
+    @Delete(':id')
+    async delete(@Param('id') id: string) {
+        if (!id) throw new BadRequestException('Debe proporcionar un ID válido');
+        return this.activitiesService.deleteActivity(id);
     }
 }
