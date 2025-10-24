@@ -1,9 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany } from 'typeorm';
 import { Subscription } from '../../suscriptions/entities/subscription.entity';
-import { v4 as uuidv4 } from 'uuid';
-import { Payment } from '../../payments/entities/payment.entity';
+import { Pay } from '../../payments/entities/payment.entity';
+import { Reservation } from '../../reservations/entities/reservation.entity';
 
-@Entity()
+@Entity({
+    name: "users"
+})
+
 export class User {
     @PrimaryGeneratedColumn("uuid")
     id: string;
@@ -23,10 +26,16 @@ export class User {
     @Column({ default: 'activo' })
     status: string;
 
+    @Column({default: false})
+    isAdmin: false
+
     @OneToOne(() => Subscription, (subscription) => subscription.user)
     subscription: Subscription;
 
-    @OneToMany(() => Payment, (payment) => payment.user)
-    payments: Payment[];
+    @OneToMany(() => Pay, (payment) => payment.user)
+    payments: Pay[];
+
+    @OneToMany(() => Reservation, (reservation) => reservation.user)
+    reservations: Reservation[];
 
 }

@@ -21,4 +21,28 @@ export class AdminService {
     if (userId) return this.paymentsService.findByUser(userId);
     return this.paymentsService.findAll();
   }
+
+  async getStatistics() {
+    // Total de usuarios
+    const allUsers = await this.usersService.findAll();
+    const totalUsers = allUsers.length;
+    const activeUsers = allUsers.filter(u => u.status === 'activo').length;
+  
+    // Total de pagos
+    const allPayments = await this.paymentsService.findAll();
+    const totalPayments = allPayments.length;
+  
+    // Pagos por usuario
+    const paymentsByUser: Record<string, number> = {};
+    allPayments.forEach(p => {
+      paymentsByUser[p.user.id] = (paymentsByUser[p.user.id] || 0) + Number(p.amount);
+    });
+    
+    return {
+      totalUsers,
+      activeUsers,
+      totalPayments,
+      paymentsByUser
+    };
+  }
 }
