@@ -53,4 +53,8 @@ export class AuthController {
     const jwt = await this.authService.validateGoogleUser(user);
     return res.redirect(`http://localhost:5173?token=${jwt}`);
   }
+
+
+  
+
 }

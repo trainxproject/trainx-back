@@ -21,7 +21,9 @@ import { MercadoPagoModule } from './mercadopago/mercado.module';
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => {
+       
+        return {
         type: "postgres",
         database: configService.get("DB_NAME"),
         host: configService.get("DB_HOST"),
@@ -29,8 +31,11 @@ import { MercadoPagoModule } from './mercadopago/mercado.module';
         username: configService.get("DB_USERNAME"),
         password: configService.get("DB_PASSWORD") as string,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true
-      })
+        synchronize: true,
+        logging: true
+      }
+      }
+       
     }),
     UsersModule,
     SubscriptionsModule,
@@ -43,6 +48,8 @@ import { MercadoPagoModule } from './mercadopago/mercado.module';
     MercadoPagoModule
   ],
 })
+
+
 export class AppModule implements OnApplicationBootstrap {
  
   

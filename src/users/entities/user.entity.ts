@@ -3,7 +3,9 @@ import { Subscription } from '../../suscriptions/entities/subscription.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { Pay } from '../../payments/entities/payment.entity';
 
-@Entity()
+@Entity({
+    name: "users"
+})
 export class User {
     @PrimaryGeneratedColumn("uuid")
     id: string;

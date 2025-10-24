@@ -5,7 +5,9 @@ import {PlansEnum, SubStatus } from 'src/pay.enum';
 
 
 
-@Entity()
+@Entity({
+    name: "payments"
+})
 export class Pay {
     @PrimaryGeneratedColumn('uuid')
     id: string;
