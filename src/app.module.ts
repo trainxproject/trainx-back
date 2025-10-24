@@ -23,7 +23,7 @@ import { MercadoPagoModule } from './mercadopago/mercado.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
        
-        return {
+      return {
         type: "postgres",
         database: configService.get("DB_NAME"),
         host: configService.get("DB_HOST"),
