@@ -2,10 +2,13 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, Jo
 import { User } from 'src/users/entities/user.entity';
 import { Plan } from 'src/plans/plan.entity';
 import {PlansEnum, SubStatus } from 'src/pay.enum';
+import { Subscription } from 'src/suscriptions/entities/subscription.entity';
 
 
 
-@Entity()
+@Entity({
+    name: "payments"
+})
 export class Pay {
     @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -24,6 +27,9 @@ export class Pay {
 
     @Column({ default: false })
     isSubscription: boolean;
+
+    @Column({default: false})
+    paid: boolean
 
     @Column({
         type: 'enum',
@@ -59,4 +65,8 @@ export class Pay {
 
     @Column()
     endsAt: Date;
+
+    @ManyToOne(() => Subscription, (subscription) => subscription.payments, { onDelete: 'SET NULL', nullable: true })
+    @JoinColumn()
+    subscription: Subscription;
 }

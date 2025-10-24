@@ -2,6 +2,7 @@ import { Injectable, Logger, BadRequestException, OnModuleDestroy, OnModuleInit 
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { SendEmailDto } from './dto/sendEmail.dto';
+import { CreateNotificationDto } from './dto/createNotification.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -50,23 +51,23 @@ El equipo de TrainX 💙
     };
   }
 
-  // private buildActivityMessage(dto: CreateNotificationDto) {
-  //   const { type, photoTitle, comment } = dto;
+  private buildActivityMessage(dto: CreateNotificationDto) {
+    const { type, photoTitle, comment } = dto;
 
-  //   if (type === 'like') {
-  //     return {
-  //       subject: `🎉 Tu foto "${photoTitle}" recibió un like!`,
-  //       message: `¡Alguien le dio like a tu foto "${photoTitle}" en TrainX! 💙`,
-  //     };
-  //   } else if (type === 'comment') {
-  //     return {
-  //       subject: `💬 Nuevo comentario en tu foto "${photoTitle}"`,
-  //       message: `Alguien comentó en tu foto "${photoTitle}":\n\n"${comment}"`,
-  //     };
-  //   } else {
-  //     throw new BadRequestException('Tipo de notificación inválido');
-  //   }
-  // }
+    if (type === 'like') {
+      return {
+        subject: `🎉 Tu foto "${photoTitle}" recibió un like!`,
+        message: `¡Alguien le dio like a tu foto "${photoTitle}" en TrainX! 💙`,
+      };
+    } else if (type === 'comment') {
+      return {
+        subject: `💬 Nuevo comentario en tu foto "${photoTitle}"`,
+        message: `Alguien comentó en tu foto "${photoTitle}":\n\n"${comment}"`,
+      };
+    } else {
+      throw new BadRequestException('Tipo de notificación inválido');
+    }
+  }
 
   public async sendEmail(to: string, subject: string, message: string) {
     try {
@@ -90,8 +91,8 @@ El equipo de TrainX 💙
     return this.sendEmail(dto.email, subject, message);
   }
 
-  // async sendActivity(dto: CreateNotificationDto) {
-  //   const { subject, message } = this.buildActivityMessage(dto);
-  //   return this.sendEmail(dto.recipientEmail, subject, message);
-  // }
+  async sendActivity(dto: CreateNotificationDto) {
+    const { subject, message } = this.buildActivityMessage(dto);
+    return this.sendEmail(dto.recipientEmail, subject, message);
+  }
 }

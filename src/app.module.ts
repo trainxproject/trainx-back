@@ -8,10 +8,10 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AdminModule } from './admin/admin.module';
 import { PaymentsModule } from './payments/payments.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ActivitiesModule } from './activities/activities.module';
+import { SchedulesModule } from './schedules/schedules.module';
+import { ReservationsModule } from './reservations/reservations.module';
 import { PlanSeeder } from './plans/plan.seeder';
-import { PlanModule } from './plans/plan.module';
-import { MercadoPagoModule } from './mercadopago/mercado.module';
-
 
 @Module({
   imports: [
@@ -39,8 +39,9 @@ import { MercadoPagoModule } from './mercadopago/mercado.module';
     AdminModule,
     PaymentsModule,
     NotificationsModule,
-    PlanModule,
-    MercadoPagoModule
+    ActivitiesModule,
+    SchedulesModule,
+    ReservationsModule,
   ],
 })
 export class AppModule implements OnApplicationBootstrap {

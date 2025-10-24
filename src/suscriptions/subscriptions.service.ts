@@ -2,68 +2,66 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subscription } from './entities/subscription.entity';
+import { PaymentsService } from '../payments/payments.service';
 
 @Injectable()
 export class SubscriptionsService {
   constructor(
     @InjectRepository(Subscription)
     private subscriptionsRepository: Repository<Subscription>,
+    private paymentsService: PaymentsService,
   ) {}
 
-  // 📋 Obtener todas las suscripciones (con datos del usuario)
   findAll() {
     return this.subscriptionsRepository.find({ relations: ['user'] });
   }
 
-  // ➕ Crear una nueva suscripción
   async create(subscription: Partial<Subscription>) {
     const startDate = new Date();
     const endDate = new Date();
-    endDate.setMonth(endDate.getMonth() + 1); // vence en un mes
+    endDate.setMonth(endDate.getMonth() + 1);
+
+    // Verificamos si hay un pago confirmado para este usuario
+    const payments = await this.paymentsService.findByUser(subscription.user?.id!);
+    const hasPaid = payments.some(p => p.paid);
 
     const newSubscription = this.subscriptionsRepository.create({
       ...subscription,
       startDate,
       endDate,
-      isActive: true,
+      isActive: hasPaid, // activa solo si hay pago confirmado
     });
 
     return this.subscriptionsRepository.save(newSubscription);
   }
 
-  // ❌ Eliminar una suscripción
-  remove(id: string) {
-    return this.subscriptionsRepository.delete(id);
-  }
-
-  // ✅ Verificar si una suscripción está activa o vencida
   async checkSubscriptionStatus(id: string) {
     const subscription = await this.subscriptionsRepository.findOne({
       where: { id },
       relations: ['user'],
     });
 
-    if (!subscription) {
-      return { message: 'Suscripción no encontrada' };
-    }
+    if (!subscription) return { message: 'Suscripción no encontrada' };
 
+    // Verificar fecha
     const today = new Date();
-
-    // Compara la fecha actual con la fecha de fin
     if (today > new Date(subscription.endDate)) {
       subscription.isActive = false;
       await this.subscriptionsRepository.save(subscription);
-      return {
-        message: 'Subscription expired',
-        isActive: false,
-        user: subscription.user,
-      };
+      return { message: 'Subscription expired', isActive: false, user: subscription.user };
     }
 
-    return {
-      message: 'Active subscription',
-      isActive: true,
-      user: subscription.user,
-    };
+    // Verificar pago
+    const payments = await this.paymentsService.findByUser(subscription.user.id);
+    const hasPaid = payments.some(p => p.paid);
+    subscription.isActive = hasPaid;
+
+    await this.subscriptionsRepository.save(subscription);
+
+    return { message: subscription.isActive ? 'Active subscription' : 'Inactive subscription', isActive: subscription.isActive, user: subscription.user };
+  }
+
+  remove(id: string) {
+    return this.subscriptionsRepository.delete(id);
   }
 }
