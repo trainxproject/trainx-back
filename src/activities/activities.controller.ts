@@ -76,13 +76,13 @@ export class ActivitiesController {
 
     @Put(':id')
     async update(@Param('id') id: string, @Body() body: UpdateActivityDto) {
-        if (!id) throw new BadRequestException('Debe proporcionar un ID válido');
+        if (!id) throw new BadRequestException('You must provide a valid ID');
         return this.activitiesService.updateActivity(id, body);
     }
     
     @Delete(':id')
     async delete(@Param('id') id: string) {
-        if (!id) throw new BadRequestException('Debe proporcionar un ID válido');
+        if (!id) throw new BadRequestException('You must provide a valid ID');
         return this.activitiesService.deleteActivity(id);
     }
 }

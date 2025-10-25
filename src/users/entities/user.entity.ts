@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Subscription } from '../../suscriptions/entities/subscription.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { Payment } from '../../payments/entities/payment.entity';
 import { Reservation } from '../../reservations/entities/reservation.entity';
+import { Trainer } from '../../trainers/entities/trainer.entity';
 
 @Entity()
 export class User {
@@ -33,4 +34,10 @@ export class User {
     @OneToMany(() => Payment, (payment) => payment.user)
     payments: Payment[];
 
+    @Column({ default: false })
+    hasPaid: boolean;
+
+    @ManyToOne(() => Trainer, { nullable: true })
+    @JoinColumn({ name: 'trainerId' })
+    trainer?: Trainer;
 }
