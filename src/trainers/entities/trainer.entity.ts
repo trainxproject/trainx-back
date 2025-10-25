@@ -13,6 +13,9 @@ export class Trainer {
     @Column()
     specialization: string;
 
+    @Column({ nullable: true})
+    formation?: string;
+
     @Column({ nullable: true })
     imageUrl?: string;
 
