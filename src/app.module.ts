@@ -12,6 +12,7 @@ import { ActivitiesModule } from './activities/activities.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { PlanSeeder } from './plans/plan.seeder';
+import { PlanModule } from './plans/plan.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { PlanSeeder } from './plans/plan.seeder';
     ActivitiesModule,
     SchedulesModule,
     ReservationsModule,
+    PlanModule
   ],
 })
 export class AppModule implements OnApplicationBootstrap {
