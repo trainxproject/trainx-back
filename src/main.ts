@@ -9,6 +9,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe())
 
+  app.enableCors({
+    origin: 'http://localhost:3001', 
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true, 
+  });
 
   ngrok.authtoken(process.env.NGROK_AUTHTOKEN as string)
   .then(()=> ngrok.connect(3000))

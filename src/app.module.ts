@@ -11,11 +11,11 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { ReservationsModule } from './reservations/reservations.module';
-<<<<<<< HEAD
 import { PlanSeeder } from './plans/plan.seeder';
-=======
 import { TrainersModule } from './trainers/trainers.module';
->>>>>>> 377e52a853dcc22e478c9950989ea53bdabed756
+import { PlanModule } from './plans/plan.module';
+import { MercadoPagoModule } from './mercadopago/mercado.module';
+
 
 @Module({
   imports: [
@@ -47,6 +47,8 @@ import { TrainersModule } from './trainers/trainers.module';
     SchedulesModule,
     ReservationsModule,
     TrainersModule,
+    PlanModule,
+    MercadoPagoModule
   ],
 })
 export class AppModule implements OnApplicationBootstrap {

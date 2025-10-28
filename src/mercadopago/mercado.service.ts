@@ -1,11 +1,14 @@
 import { Body, Controller, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { MercadoPagoConfig, Payment, PreApproval, Preference } from 'mercadopago';
+import { MercadoPagoConfig, Payment, PreApproval, Preference, MerchantOrder} from 'mercadopago';
 import { PlansEnum} from "src/pay.enum";
 import { Pay } from "src/payments/entities/payment.entity";
+import { Plan } from "src/plans/plan.entity";
+import { User } from "src/users/entities/user.entity";
 import { addDays } from "src/utils/date.util";
 import { mapStatus } from "src/utils/status.util";
-import { Repository } from "typeorm";
+import { DeepPartial, Repository } from "typeorm";
+
 
 @Injectable()
 
@@ -19,16 +22,24 @@ export class MpService {
     constructor(
         @InjectRepository(Pay)
         private readonly paymentRepo: Repository<Pay>,
+        @InjectRepository(User)
+        private readonly userRepo: Repository<User>,
+        @InjectRepository(Plan)
+        private readonly planRepo: Repository<Plan>
     ){
         this.client =  
         new  MercadoPagoConfig({accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN as string}) 
     }
 
-    async CreatePreference(paymentData: any) {
+    async CreatePreference(paymentData: any, id:string) {
 
         try {
              console.log('📩 Body recibido:', paymentData);
        const preference = new Preference(this.client)
+
+       const user = await this.userRepo.findOne({
+        where: {id: id}
+       })
         
         const result = await preference.create({
             body: {
@@ -47,7 +58,7 @@ export class MpService {
                     pending: 'https://attractive-saponaceous-cleo.ngrok-free.dev/mp/pending',
                 },
                 notification_url: `${process.env.WEBHOOK_URL}?token=${process.env.WEBHOOK_TOKEN}`,
-                external_reference: paymentData.external_reference
+                external_reference: user?.id
             }
         })
          return result
@@ -77,6 +88,9 @@ export class MpService {
             where: {MpPaymentId: String(pay.id)}
         })
 
+        // const planId = pay..[0].id
+        // const userId = pay.external_reference
+
         if(!existingPayment){
         
             const newPayment = this.paymentRepo.create({
@@ -88,6 +102,8 @@ export class MpService {
                 startsAt: new Date(),
                 endsAt: addDays(new Date(), 30),
                 isSubscription: false,
+                // user: {id: userId},
+                // plan: {id: planId},
             })
 
             await this.paymentRepo.save(newPayment)
@@ -102,55 +118,57 @@ export class MpService {
         }
     }
 
-    async processSubscription(id: any) {
+    async processMerchant(id: any) {
             
-            const approval = new PreApproval(this.client)
-            const subs = await approval.get({id: id})
+            const approval = new MerchantOrder(this.client)
+            const order = await approval.get({merchantOrderId: id})
 
-            console.log('🔁 Subscripción verificada:', subs);
+              console.log('🛒 Merchant Order verificada:', order);
 
-            if(!subs.id) throw new NotFoundException("Subscription not found")
+            if(!order.id) throw new NotFoundException("Subscription not found")
 
-            const existingSubs = await this.paymentRepo.findOne({
-                where: {externalReference: subs.external_reference}
+            const PaymentId =  order.payments?.[0].id;
+            const externalReference = order.external_reference;
+            const status =  order.order_status;
+            const totalAmount = order.total_amount;
+
+
+            const existingOrder = await this.paymentRepo.findOne({
+                where: {MpPaymentId: String(order.id)}
             })
-
-            if(!existingSubs){
             
-            const freqType = subs.auto_recurring?.frequency_type; 
-            let billingCycle: PlansEnum | undefined;
+            const plan = order.items?.[0].id
+            const user = order.external_reference
+           
+            if(!existingOrder){
+                const paymentData: DeepPartial<Pay> = ({
+                MpPaymentId: String(order.id),
+                externalReference: externalReference,
+                amount: totalAmount,
+                status: mapStatus(String(status)), 
+                billingCycle: undefined, 
+                startsAt:order.date_created ? new Date(order.date_created) : new Date(),
+                isSubscription: false,
+                endsAt: addDays(order.order_status ? new Date(String(order.date_created)) : new Date(), 30),
+                user: {id: user} as User,
+                plan: {id: plan} as Plan
+                })
 
-            if(freqType === "week-3") billingCycle = PlansEnum.WEEK3;
-            else if(freqType === "week-5") billingCycle = PlansEnum.WEEK5 
-            else billingCycle = undefined
+                const newOrder = this.paymentRepo.create(paymentData)
 
-            let endsAt: Date;
-
-            if(billingCycle === PlansEnum.WEEK3) endsAt = addDays(new Date(), 21 - 3)
-            else if(billingCycle === PlansEnum.WEEK5) endsAt = addDays(new Date(), 35 - 5) 
-            else endsAt = addDays(new Date(), 30) 
-
-            let renewalDueAt = addDays(endsAt, -3)
-
-            const newSub = this.paymentRepo.create({
-                    MpPaymentId: String(subs.id),
-                    externalReference: subs.external_reference,
-                    amount: subs.auto_recurring?.transaction_amount,
-                    status: mapStatus(subs.status as string),
-                    billingCycle,
-                    startsAt: new Date(subs.date_created as string),
-                    isSubscription: true,
-                    endsAt,
-                    renewalDueAt,
-                });
-
-                await this.paymentRepo.save(newSub);
-                console.log('💾 Nueva suscripción guardada:', newSub);
+                await this.paymentRepo.save(newOrder)
+                console.log('💾 Nueva merchant order guardada:', newOrder);
             } else {
-                existingSubs.status = mapStatus(subs.status as string);
-                await this.paymentRepo.save(existingSubs);
-                console.log('🔁 Suscripción actualizada:', existingSubs);
+                existingOrder.status = mapStatus(String(status))
+                await this.paymentRepo.update(existingOrder.id, {
+                    status: mapStatus(String(status)),
+                    amount: totalAmount,
+                });
+                console.log('🔁 Merchant order actualizada:', existingOrder);
             }
+
+
+        
         
     }
     

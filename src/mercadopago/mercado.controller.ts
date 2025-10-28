@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Post, Query} from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, Req, UseGuards} from "@nestjs/common";
 import { MpService } from "./mercado.service";
+import { AuthGuard } from "@nestjs/passport";
 
 
 @Controller("mp")
@@ -10,10 +11,13 @@ export class MpController {
     constructor(private readonly service: MpService){}
     
     @Post('preference')
+    @UseGuards(AuthGuard("jwt"))
     async preferencePay (
-        @Body() paymentData: any
+        @Body() paymentData: any,
+        @Req() req
     ){
-        const preference = await this.service.CreatePreference(paymentData)
+        const id = req.user.id
+        const preference = await this.service.CreatePreference(paymentData, id)
         return {
             init_point: preference.init_point,
             external_reference: preference.external_reference
@@ -26,17 +30,24 @@ export class MpController {
     async notification(@Body() body: any, @Query() query: any){
             console.log('🔔 Webhook recibido:', body, query);
 
-           
+            const topic =
+                query.topic ||
+                body.topic ||
+                body.type || 
+                body.action?.split('.')[0]; 
 
-              const topic = body.topic;
-            const id = body.data?.id || body.id;
+            const id =
+                query.id ||
+                body.id ||
+                body.data?.id ||
+                (body.resource ? body.resource.split('/').pop() : null);
 
-            if(topic === "subscription_preapproval" && id){
-                await this.service.processSubscription(id);
+            if(topic === "merchant_order" && id){
+                await this.service.processMerchant(id);
             } else if(topic === "payment" && id){
                 await this.service.processPayment(id);
-            } else {
-                  console.log('⚠️ Tipo de notificación no manejada:', topic);
+            } else{
+                console.log('⚠️ Tipo de notificación no manejada:', topic);
             }
 
             

@@ -39,16 +39,11 @@ export class User {
     @OneToMany(() => Reservation, (reservation) => reservation.user)
     reservations: Reservation[];
 
-<<<<<<< HEAD
-=======
-    @OneToMany(() => Payment, (payment) => payment.user)
-    payments: Payment[];
-
     @Column({ default: false })
     hasPaid: boolean;
 
     @ManyToOne(() => Trainer, { nullable: true })
     @JoinColumn({ name: 'trainerId' })
     trainer?: Trainer;
->>>>>>> 377e52a853dcc22e478c9950989ea53bdabed756
+
 }
