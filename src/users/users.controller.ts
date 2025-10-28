@@ -2,6 +2,7 @@ import { Controller, Get, Post, Delete, Param, Body, Patch } from '@nestjs/commo
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { AssignTrainerDto } from './dtos/assign-trainer.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -46,5 +47,15 @@ export class UsersController {
     @ApiResponse({ status: 200, description: 'Returns the user with the updated profile picture.' })
     async uploadProfilePicture(@Param('id') id: string, @Body() body: { imageUrl: string }) {
         return this.usersService.uploadProfilePicture(id, body.imageUrl);
+    }
+
+    @Patch(':id/trainer')
+    @ApiOperation({ summary: 'Asigna un entrenador al usuario (solo si pagó la suscripción)' })
+    @ApiResponse({ status: 200, description: 'Entrenador asignado correctamente' })
+    assignTrainer(
+        @Param('id') id: string,
+        @Body() body: AssignTrainerDto,
+    ) {
+        return this.usersService.assignTrainer(id, body.trainerId);
     }
 }

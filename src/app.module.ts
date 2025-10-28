@@ -11,7 +11,11 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { ReservationsModule } from './reservations/reservations.module';
+<<<<<<< HEAD
 import { PlanSeeder } from './plans/plan.seeder';
+=======
+import { TrainersModule } from './trainers/trainers.module';
+>>>>>>> 377e52a853dcc22e478c9950989ea53bdabed756
 
 @Module({
   imports: [
@@ -42,6 +46,7 @@ import { PlanSeeder } from './plans/plan.seeder';
     ActivitiesModule,
     SchedulesModule,
     ReservationsModule,
+    TrainersModule,
   ],
 })
 export class AppModule implements OnApplicationBootstrap {
