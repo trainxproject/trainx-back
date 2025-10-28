@@ -17,7 +17,7 @@ async function bootstrap() {
   
   const config = new DocumentBuilder()
     .setTitle('TRAIN-X')
-    .setDescription('Documentación de API para TRAIN-X')
+    .setDescription('Complete REST API for TRAIN-X Gym Management System. Handle memberships, class reservations, training plans, coach scheduling, and member activities. Provides full gym management capabilities including user authentication, booking system, and membership plans.')
     .setVersion('1.0')
     .build();
 
