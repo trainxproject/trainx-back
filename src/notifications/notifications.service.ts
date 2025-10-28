@@ -22,11 +22,11 @@ export class NotificationsService {
       auth: { user, pass },
     });
 
-    setTimeout(()=>{
-      this.transporter.verify()
-      .then(() => this.logger.log('✅ Mail transporter ready'))
-      .catch(err => this.logger.error('❌ Mail transporter verification failed', err));
-    })
+    // setTimeout(()=>{
+    //   this.transporter.verify()
+    //   .then(() => this.logger.log('✅ Mail transporter ready'))
+    //   .catch(err => this.logger.error('❌ Mail transporter verification failed', err));
+    // })
     
   }
 
