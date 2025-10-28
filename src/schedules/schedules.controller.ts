@@ -26,7 +26,7 @@ export class SchedulesController {
 
     @Post('seeder')
 async seed() {
-    // Primero obtenemos los IDs de las actividades
+
     const activities = await this.activitiesService.findAll();
     
     const crossfit = activities.find(a => a.name === 'CrossFit');
@@ -60,5 +60,5 @@ async seed() {
     }
 
     return { message: 'Schedules seeded successfully ✅' };
-}
+    }
 }
