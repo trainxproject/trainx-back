@@ -7,6 +7,14 @@ import ngrok from "ngrok"
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors({
+    origin: 'http://localhost:3001', // frontend
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true, // si vas a usar cookies o tokens en headers
+  });
+
+
   app.useGlobalPipes(new ValidationPipe())
 
 

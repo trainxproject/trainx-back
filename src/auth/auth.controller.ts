@@ -51,6 +51,6 @@ export class AuthController {
   async googleCallback(@Req() req: Request, @Res() res: Response) {
     const user = req.user;
     const jwt = await this.authService.validateGoogleUser(user);
-    return res.redirect(`http://localhost:5173?token=${jwt}`);
+    return res.redirect(`http://localhost:3001?token=${jwt}`);
   }
 }
