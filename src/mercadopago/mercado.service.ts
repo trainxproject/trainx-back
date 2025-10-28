@@ -88,12 +88,12 @@ export class MpService {
             where: {MpPaymentId: String(pay.id)}
         })
 
-        // const planId = pay..[0].id
-        // const userId = pay.external_reference
+         const plan = pay.additional_info?.items?.[0].id
+        const user = pay.external_reference
 
         if(!existingPayment){
         
-            const newPayment = this.paymentRepo.create({
+            const newPayment: DeepPartial<Pay> = ({
                 MpPaymentId: String(pay.id),
                 amount: pay.transaction_amount,
                 status: mapStatus(pay.status as string),
@@ -102,12 +102,13 @@ export class MpService {
                 startsAt: new Date(),
                 endsAt: addDays(new Date(), 30),
                 isSubscription: false,
-                // user: {id: userId},
-                // plan: {id: planId},
+                user: {id: user} as User,
+                plan: {id: plan} as Plan,
             })
+            const newOrder = this.paymentRepo.create(newPayment)
 
-            await this.paymentRepo.save(newPayment)
-            console.log('💾 Nuevo pago guardado:', newPayment);
+            await this.paymentRepo.save(newOrder)
+            console.log('💾 Nuevo pago guardado:', newOrder);
         } else {
             existingPayment.status = mapStatus(pay.status as string)
             existingPayment.amount = pay.transaction_amount as number,
