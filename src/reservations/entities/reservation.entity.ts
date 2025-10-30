@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 @Entity()
 export class Reservation {
     @PrimaryGeneratedColumn("uuid")
-    id: string = uuidv4();
+    id: string;
 
     @ManyToOne(() => User, (user) => user.reservations)
     user: User;
