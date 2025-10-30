@@ -16,7 +16,6 @@ import { TrainersModule } from './trainers/trainers.module';
 import { PlanModule } from './plans/plan.module';
 import { MercadoPagoModule } from './mercadopago/mercado.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({

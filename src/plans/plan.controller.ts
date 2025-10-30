@@ -2,20 +2,29 @@ import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Put, 
 import { PlanService } from "./plan.service";
 import { partialDto, planDto } from "./plan.dto";
 import { AuthGuard } from "@nestjs/passport";
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from "@nestjs/swagger";
 
+@ApiTags('Plans')
 @Controller("plans")
-
 export class PlanController{
 
     constructor(private readonly service: PlanService){}
     
     @Get()
+    @ApiOperation({ summary: 'Get all plans' })
+    @ApiResponse({ status: 200, description: 'List of plans retrieved successfully' })
     async viewPlan(){
         return await this.service.view()
     }
     
     @UseGuards(AuthGuard("jwt"))
     @Post()
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Create a new plan' })
+    @ApiBody({ type: planDto })
+    @ApiResponse({ status: 201, description: 'Plan created successfully' })
+    @ApiResponse({ status: 400, description: 'Invalid input data' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
     async createPlan(
         @Body() plan: planDto,
         @Req() req: any
@@ -25,6 +34,12 @@ export class PlanController{
     }
     
     @Put(":id")
+    @ApiOperation({ summary: 'Update a plan' })
+    @ApiParam({ name: 'id', description: 'Plan ID' })
+    @ApiBody({ type: partialDto })
+    @ApiResponse({ status: 200, description: 'Plan updated successfully' })
+    @ApiResponse({ status: 400, description: 'Invalid input data' })
+    @ApiResponse({ status: 404, description: 'Plan not found' })
     async modifyPlan(
         @Param("id", new ParseUUIDPipe()) planId: string,
         @Body() plan: partialDto,
@@ -35,6 +50,10 @@ export class PlanController{
     }
 
     @Delete(":id")
+    @ApiOperation({ summary: 'Delete a plan' })
+    @ApiParam({ name: 'id', description: 'Plan ID' })
+    @ApiResponse({ status: 200, description: 'Plan deleted successfully' })
+    @ApiResponse({ status: 404, description: 'Plan not found' })
     async deletePlan(
         @Param("id", new ParseUUIDPipe) id: string,
         @Req() req: any
@@ -45,6 +64,10 @@ export class PlanController{
     }
 
     @Patch(":id")
+    @ApiOperation({ summary: 'Update plan status' })
+    @ApiParam({ name: 'id', description: 'Plan ID' })
+    @ApiResponse({ status: 200, description: 'Plan status updated successfully' })
+    @ApiResponse({ status: 404, description: 'Plan not found' })
     async modifyStatus(
         @Param("id", new ParseUUIDPipe) id: string,
         @Req() req: any

@@ -1,36 +1,33 @@
-import { Injectable, Logger, BadRequestException, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 import { SendEmailDto } from './dto/sendEmail.dto';
 import { CreateNotificationDto } from './dto/createNotification.dto';
 
 @Injectable()
 export class NotificationsService {
-  private transporter;
   private logger = new Logger(NotificationsService.name);
 
   constructor(private configService: ConfigService) {
-    const user = this.configService.get<string>('EMAIL_USER');
-    const pass = this.configService.get<string>('EMAIL_PASS');
-
-    console.log('EMAIL_USER:', user);
-    console.log('EMAIL_PASS:', pass ? '****' : 'NOT SET');
-
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: { user, pass },
-    });
-
-    // setTimeout(()=>{
-    //   this.transporter.verify()
-    //   .then(() => this.logger.log('✅ Mail transporter ready'))
-    //   .catch(err => this.logger.error('❌ Mail transporter verification failed', err));
-    // })
+    const sendgridKey = this.configService.get<string>('SENDGRID_API_KEY');
+    const emailUser = this.configService.get<string>('EMAIL_USER');
     
+    if (!sendgridKey) {
+      this.logger.error('❌ SENDGRID_API_KEY no está configurada en el .env');
+      throw new Error('SENDGRID_API_KEY missing');
+    }
+  
+    if (!emailUser) {
+      this.logger.error('❌ EMAIL_USER no está configurada en el .env');
+      throw new Error('EMAIL_USER missing');
+    }
+  
+    this.logger.log(`🔑 SendGrid Key: ${sendgridKey ? 'Presente' : 'Faltante'}`);
+    this.logger.log(`📧 Email From: ${emailUser}`);
+    
+    sgMail.setApiKey(sendgridKey);
+    this.logger.log('✅ SendGrid configurado correctamente');
   }
-
 
   private buildWelcomeMessage(dto: SendEmailDto) {
     const { name } = dto;
@@ -69,19 +66,24 @@ El equipo de TrainX 💙
     }
   }
 
-  public async sendEmail(to: string, subject: string, message: string) {
+  private async sendEmail(to: string, subject: string, message: string) {
     try {
-      const info = await this.transporter.sendMail({
-        from: `"Train-X" <${this.configService.get('EMAIL_USER')}>`,
+      const from = this.configService.get<string>('EMAIL_USER') || 'no-reply@trainx.com';
+
+      await sgMail.send({
         to,
+        from: {
+          email: from,
+          name: 'TrainX',
+        },
         subject,
         text: message,
       });
 
-      this.logger.log(`Correo enviado: ${info.messageId} a ${to}`);
+      this.logger.log(`📩 Correo enviado exitosamente a ${to}`);
       return { success: true };
     } catch (error) {
-      this.logger.error(`Error enviando correo a ${to}: ${error.message}`, error.stack);
+      this.logger.error(`❌ Error enviando correo a ${to}: ${error.message}`, error.stack);
       return { success: false, error: error.message };
     }
   }
