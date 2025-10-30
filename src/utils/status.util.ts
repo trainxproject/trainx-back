@@ -7,6 +7,7 @@ export function mapStatus (status: string): SubStatus {
     switch (status) {
         case 'authorized':
         case 'active':
+        case 'approved':    
             return SubStatus.ACTIVE;
         case 'paused':
         case 'pending':

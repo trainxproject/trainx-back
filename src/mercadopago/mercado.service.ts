@@ -31,25 +31,31 @@ export class MpService {
         new  MercadoPagoConfig({accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN as string}) 
     }
 
-    async CreatePreference(paymentData: any, id:string) {
+    async CreatePreference(paymentData: any, id:string, idPlan: string) {
 
         try {
-             console.log('📩 Body recibido:', paymentData);
-       const preference = new Preference(this.client)
+            console.log('📩 Body recibido:', paymentData);
+            const preference = new Preference(this.client)
 
-       const user = await this.userRepo.findOne({
-        where: {id: id}
-       })
+            const user = await this.userRepo.findOne({
+                where: {id: id}
+            })
+
+            const plan = await this.planRepo.findOne({
+                where: {id: idPlan}
+            })
+
         
         const result = await preference.create({
             body: {
                 items:[
                     {
-                    id: paymentData.id.substring(0, 256), 
-                    title: paymentData.title.substring(0, 256),
+                    id: String(plan?.id), 
+                    title: String(plan?.name),
                     quantity: Number(paymentData.quantity) || 1,
-                    unit_price: Number(paymentData.price),
-                    currency_id: paymentData.currency || "ARS" 
+                    unit_price: Number(plan?.price),
+                    currency_id: plan?.currency,
+                    description: plan?.type
                 }
                 ],
                 back_urls: {
@@ -78,11 +84,11 @@ export class MpService {
     async processPayment(id: string) {
 
         const myPayment = new Payment(this.client)
-        const pay = await myPayment.get({id: id})
+        const payResponse = await myPayment.get({id: id})
+        const pay = payResponse; 
 
+        // if (!pay?.id) throw new NotFoundException('Payment not found');
         console.log('📦 Pago verificado:', pay);
-
-         if(!pay.id) throw new NotFoundException("Not found")
 
         const existingPayment = await this.paymentRepo.findOne({
             where: {MpPaymentId: String(pay.id)}
@@ -97,6 +103,8 @@ export class MpService {
                 MpPaymentId: String(pay.id),
                 amount: pay.transaction_amount,
                 status: mapStatus(pay.status as string),
+                paid: true,
+                billingCycle: pay.additional_info?.items?.[0].description as PlansEnum,
                 paymentMethod: pay.payment_type_id,
                 externalReference: pay.external_reference,
                 startsAt: new Date(),
@@ -110,12 +118,24 @@ export class MpService {
             await this.paymentRepo.save(newOrder)
             console.log('💾 Nuevo pago guardado:', newOrder);
         } else {
-            existingPayment.status = mapStatus(pay.status as string)
-            existingPayment.amount = pay.transaction_amount as number,
-            existingPayment.paymentMethod = pay.payment_type_id as string,
 
-            await this.paymentRepo.save(existingPayment)
-            console.log('🔁 Pago actualizado:', existingPayment);
+            if (!existingPayment?.id) {
+                throw new NotFoundException("Payment existente sin ID válido — no se puede actualizar");
+            }
+
+            const updatedFields = {
+                status: mapStatus(pay.status as string),
+                amount:  pay.transaction_amount as number,
+                paymentMethod: pay.payment_type_id as string
+                
+            }
+
+            await this.paymentRepo.update(existingPayment.id, updatedFields)
+
+            console.log('🔁 Pago actualizado:', {
+                id: existingPayment.id,
+                ...updatedFields
+        });
         }
     }
 
@@ -126,47 +146,47 @@ export class MpService {
 
               console.log('🛒 Merchant Order verificada:', order);
 
-            if(!order.id) throw new NotFoundException("Subscription not found")
+            // if(!order.id) throw new NotFoundException("Subscription not found")
 
-            const PaymentId =  order.payments?.[0].id;
-            const externalReference = order.external_reference;
-            const status =  order.order_status;
-            const totalAmount = order.total_amount;
+            // const PaymentId =  order.payments?.[0].id;
+            // const externalReference = order.external_reference;
+            // const status =  order.order_status;
+            // const totalAmount = order.total_amount;
 
 
-            const existingOrder = await this.paymentRepo.findOne({
-                where: {MpPaymentId: String(order.id)}
-            })
+            // const existingOrder = await this.paymentRepo.findOne({
+            //     where: {MpPaymentId: String(order.id)}
+            // })
             
-            const plan = order.items?.[0].id
-            const user = order.external_reference
+            // const plan = order.items?.[0].id
+            // const user = order.external_reference
            
-            if(!existingOrder){
-                const paymentData: DeepPartial<Pay> = ({
-                MpPaymentId: String(order.id),
-                externalReference: externalReference,
-                amount: totalAmount,
-                status: mapStatus(String(status)), 
-                billingCycle: undefined, 
-                startsAt:order.date_created ? new Date(order.date_created) : new Date(),
-                isSubscription: false,
-                endsAt: addDays(order.order_status ? new Date(String(order.date_created)) : new Date(), 30),
-                user: {id: user} as User,
-                plan: {id: plan} as Plan
-                })
+            // if(!existingOrder){
+            //     const paymentData: DeepPartial<Pay> = ({
+            //     MpPaymentId: String(order.id),
+            //     externalReference: externalReference,
+            //     amount: totalAmount,
+            //     status: mapStatus(String(status)), 
+            //     billingCycle: undefined, 
+            //     startsAt:order.date_created ? new Date(order.date_created) : new Date(),
+            //     isSubscription: false,
+            //     endsAt: addDays(order.order_status ? new Date(String(order.date_created)) : new Date(), 30),
+            //     user: {id: user} as User,
+            //     plan: {id: plan} as Plan
+            //     })
 
-                const newOrder = this.paymentRepo.create(paymentData)
+            //     const newOrder = this.paymentRepo.create(paymentData)
 
-                await this.paymentRepo.save(newOrder)
-                console.log('💾 Nueva merchant order guardada:', newOrder);
-            } else {
-                existingOrder.status = mapStatus(String(status))
-                await this.paymentRepo.update(existingOrder.id, {
-                    status: mapStatus(String(status)),
-                    amount: totalAmount,
-                });
-                console.log('🔁 Merchant order actualizada:', existingOrder);
-            }
+            //     await this.paymentRepo.save(newOrder)
+            //     console.log('💾 Nueva merchant order guardada:', newOrder);
+            // } else {
+            //     existingOrder.status = mapStatus(String(status))
+            //     await this.paymentRepo.update(existingOrder.id, {
+            //         status: mapStatus(String(status)),
+            //         amount: totalAmount,
+            //     });
+            //     console.log('🔁 Merchant order actualizada:', existingOrder);
+            // }
 
 
         

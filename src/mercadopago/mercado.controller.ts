@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards} from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, Req, UseGuards} from "@nestjs/common";
 import { MpService } from "./mercado.service";
 import { AuthGuard } from "@nestjs/passport";
 
@@ -10,14 +10,15 @@ export class MpController {
 
     constructor(private readonly service: MpService){}
     
-    @Post('preference')
+    @Post('preference/:id')
     @UseGuards(AuthGuard("jwt"))
     async preferencePay (
+        @Param("id", new ParseUUIDPipe()) idPlan: string,
         @Body() paymentData: any,
         @Req() req
     ){
         const id = req.user.id
-        const preference = await this.service.CreatePreference(paymentData, id)
+        const preference = await this.service.CreatePreference(paymentData, id, idPlan)
         return {
             init_point: preference.init_point,
             external_reference: preference.external_reference
