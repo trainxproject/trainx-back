@@ -83,6 +83,13 @@ export class ActivitiesController {
                 imageUrl: 'https://res.cloudinary.com/dxpqhpme3/image/upload/v1760749983/zumba_lrfnws.jpg',
             },
             {
+                name: 'Telas',
+                description: 'Aerial training class on fabrics, focusing on strength, flexibility, coordination, and body control.',
+                requiresReservation: true,
+                maxCapacity: 10,
+                imageUrl: 'https://res.cloudinary.com/dxpqhpme3/image/upload/v1761435519/Poster_Clases_de_Tela_Acrobatica_Con_Fotos_Circulares_Lavanda_zyi9eg.jpg',
+            },
+            {
                 name: 'Gym',
                 description: 'Free access to the gym to train at any time within the authorized hours.',
                 requiresReservation: false,

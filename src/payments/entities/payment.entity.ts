@@ -60,7 +60,7 @@ export class Pay {
     @Column()
     startsAt: Date;
 
-    @Column()
+    @Column({nullable: true})
     renewalDueAt: Date;
 
     @Column()

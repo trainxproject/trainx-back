@@ -12,7 +12,9 @@ import { ActivitiesModule } from './activities/activities.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { PlanSeeder } from './plans/plan.seeder';
+import { TrainersModule } from './trainers/trainers.module';
 import { PlanModule } from './plans/plan.module';
+import { MercadoPagoModule } from './mercadopago/mercado.module';
 
 @Module({
   imports: [
@@ -43,7 +45,9 @@ import { PlanModule } from './plans/plan.module';
     ActivitiesModule,
     SchedulesModule,
     ReservationsModule,
-    PlanModule
+    TrainersModule,
+    PlanModule,
+    MercadoPagoModule
   ],
 })
 export class AppModule implements OnApplicationBootstrap {

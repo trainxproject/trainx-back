@@ -1,6 +1,5 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-// import * as sgMail from '@sendgrid/mail';
 import sgMail from '@sendgrid/mail';
 import { SendEmailDto } from './dto/sendEmail.dto';
 import { CreateNotificationDto } from './dto/createNotification.dto';
