@@ -16,6 +16,16 @@ export class ReservationsService {
         private subscriptionRepository: Repository<Subscription>,
     ) {}
 
+    async findAllReservations() {
+        return this.reservationRepository.find({ relations: ['user', 'schedule', 'schedule.activity'] });
+    }
+
+    async findUserReservations(userId: string) {
+        return this.reservationRepository.find({
+            where: { user: { id: userId } },
+        })
+    }
+
     async createReservation(userId: string, scheduleId: string) {
         const schedule = await this.scheduleRepository.findOne({
         where: { id: scheduleId },

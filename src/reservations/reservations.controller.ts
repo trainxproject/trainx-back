@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Delete, Param, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Delete, Param, BadRequestException, Get } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CancelReservationDto } from "./dtos/cancel-reservation.dto"
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
@@ -7,6 +7,19 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/s
 @Controller('reservations')
 export class ReservationsController {
     constructor(private readonly reservationsService: ReservationsService) {}
+
+    @Get()
+    @ApiOperation({ summary: 'Get all reservations' })
+    @ApiResponse({ status: 200, description: 'List of reservations retrieved successfully' })
+    findAllReservations() {
+        return this.reservationsService.findAllReservations();
+    }
+
+    @Get("user/:id")
+    @ApiOperation({ summary: 'Get user reservations' })
+    findUserReservations(@Param('userId') userId: string) {
+        return this.reservationsService.findUserReservations(userId);
+    }
 
     @Post()
     @ApiOperation({ summary: 'Create a new reservation' })
