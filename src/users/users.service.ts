@@ -89,4 +89,24 @@ export class UsersService {
         user.name = newName;
         return this.usersRepository.save(user);
     }
+
+    async findAllComplete(): Promise<User[]> {
+        return this.usersRepository.find({
+            relations: [
+                'subscription',
+                'payments',
+                'payments.plan',
+                'trainer',
+                'reservations',
+                'reservations.schedule',
+                'reservations.schedule.activity'
+            ],
+            order: {
+                name: 'ASC',
+                payments: {
+                createdAt: 'DESC'
+                }
+            }
+        });
+    }
 }

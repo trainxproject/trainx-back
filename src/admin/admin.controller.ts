@@ -31,4 +31,14 @@ export class AdminController {
   async getStatistics() {
     return this.adminService.getStatistics();
   }
+
+  @Get('users')
+  @ApiOperation({ summary: 'Get complete list of all users with their subscription, payments, trainer and reservations' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Returns detailed list of all users with their related data.' 
+  })
+  async getUsersList() {
+    return this.adminService.getUsersList();
+}
 }
