@@ -23,6 +23,13 @@ export class UsersService {
         return this.usersRepository.findOne({ where: { id } });
     }
 
+    async findUserTrainer(id: string) {
+        return this.usersRepository.findOne({
+            where: { id },
+            relations: ['trainer'],
+        });
+    }
+
     async create(user: Partial<User>) {
         const newUser = this.usersRepository.create(user);
         return this.usersRepository.save(newUser);
@@ -75,11 +82,11 @@ export class UsersService {
         };
     }
 
-    @Get(':id')
-    findUserTrainer(@Param('id') id: string) {
-    return this.usersRepository.findOne({
-        where: { id },
-        relations: ['trainer'],
-    });
+    async updateName(id: string, newName: string): Promise<User> {
+        const user = await this.usersRepository.findOne({ where: { id } });
+        if (!user) throw new NotFoundException('Usuario no encontrado');
+
+        user.name = newName;
+        return this.usersRepository.save(user);
     }
 }
