@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { AssignTrainerDto } from './dtos/assign-trainer.dto';
+import { UpdateNameDto } from './dtos/update-name.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -22,6 +23,11 @@ export class UsersController {
     @ApiResponse({ status: 200, description: 'Returns the user details for the specified ID.' })
     findOne(@Param('id') id: string) {
         return this.usersService.findOne(id);
+    }
+
+    @Get(':id')
+    findUserTrainer(@Param('id') id: string) {
+        return this.usersService.findUserTrainer(id);
     }
 
     @Post()
@@ -57,5 +63,14 @@ export class UsersController {
         @Body() body: AssignTrainerDto,
     ) {
         return this.usersService.assignTrainer(id, body.trainerId);
+    }
+    
+    @Patch(':id/name')
+    @ApiOperation({ summary: 'Actualizar el nombre de un usuario específico' })
+    @ApiParam({ name: 'id', description: 'ID del usuario a actualizar', type: String })
+    @ApiBody({ type: UpdateNameDto })
+    @ApiResponse({ status: 200, description: 'Returns the user with the updated name.' })
+    async updateName(@Param('id') id: string, @Body() body: UpdateNameDto) {
+        return this.usersService.updateName(id, body.name);
     }
 }

@@ -19,7 +19,7 @@ export class Trainer {
     @Column({ nullable: true })
     imageUrl?: string;
 
-    @Column({default: 0})
+    @Column({ type: "decimal", precision: 2, scale: 1, default: 0 })
     qualification: number
 
     @Column({ default: true })

@@ -6,6 +6,7 @@ import { CreateTrainerDto } from './dto/create-trainer.dto';
 import { User } from 'src/users/entities/user.entity';
 import { use } from 'passport';
 import { TrainerQualification } from './entities/qualification.entity';
+import { throwError } from 'rxjs';
 
 @Injectable()
 export class TrainersService {
@@ -45,7 +46,17 @@ export class TrainersService {
     const trainer = await this.trainersRepository.findOne({where: {id: idTrainer}})
     if(!trainer) throw new NotFoundException("The Trainer not exist")
 
-    if(rating < 1 || rating > 5){
+    const existQuali = await this.qualiRepository.findOne({
+      where: {trainer: {id: trainer.id}, user: {id: user.id}},
+      relations: ["user", "trainer"]
+    })
+
+
+    if(existQuali){
+      throw new ForbiddenException("You have already rated this trainer.");
+    } else {
+    
+      if(rating < 1 || rating > 5){
       throw new BadRequestException("The qualification is invalid")
     }
 
@@ -57,12 +68,13 @@ export class TrainersService {
 
     await this.qualiRepository.save(qualiCreate)
 
+   
     const qualiVerify = await this.qualiRepository.find({
       where: {trainer: {id: trainer.id}}
     })
 
 
-    const average = qualiVerify.reduce((sum, q)=> sum + q.rating  ,0) / qualiVerify.length;
+    const average = qualiVerify.length ? qualiVerify.reduce((sum, q)=> sum + Number(q.rating)  ,0) / qualiVerify.length : rating;
 
     trainer.qualification = parseFloat(average.toFixed(1))
     await this.trainersRepository.save(trainer)
@@ -71,7 +83,7 @@ export class TrainersService {
     message: 'Trainer qualified successfully',
     average: trainer.qualification,
     };
-
+  }
 
   }
 

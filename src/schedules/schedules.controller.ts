@@ -48,7 +48,7 @@ export class SchedulesController {
         return this.schedulesService.create(data);
     }
 
-    @Post('seeder')
+@Post('seeder')
 async seed() {
 
     const activities = await this.activitiesService.findAll();

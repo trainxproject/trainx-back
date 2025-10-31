@@ -25,7 +25,7 @@ export class User {
     @Column({ nullable: true })
     profilePicture: string;
 
-    @Column({ default: 'activo' })
+    @Column({ default: 'active' })
     status: string;
 
     @Column({default: false})
