@@ -4,9 +4,7 @@ import { In, Repository } from 'typeorm';
 import { Trainer } from './entities/trainer.entity';
 import { CreateTrainerDto } from './dto/create-trainer.dto';
 import { User } from 'src/users/entities/user.entity';
-import { use } from 'passport';
 import { TrainerQualification } from './entities/qualification.entity';
-import { throwError } from 'rxjs';
 
 @Injectable()
 export class TrainersService {
@@ -68,11 +66,10 @@ export class TrainersService {
 
     await this.qualiRepository.save(qualiCreate)
 
-   
+
     const qualiVerify = await this.qualiRepository.find({
       where: {trainer: {id: trainer.id}}
     })
-
 
     const average = qualiVerify.length ? qualiVerify.reduce((sum, q)=> sum + Number(q.rating)  ,0) / qualiVerify.length : rating;
 
@@ -83,7 +80,8 @@ export class TrainersService {
     message: 'Trainer qualified successfully',
     average: trainer.qualification,
     };
-  }
+
+    }
 
   }
 
