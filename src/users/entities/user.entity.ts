@@ -3,6 +3,7 @@ import { Subscription } from '../../suscriptions/entities/subscription.entity';
 import { Pay } from '../../payments/entities/payment.entity';
 import { Reservation } from '../../reservations/entities/reservation.entity';
 import { Trainer } from '../../trainers/entities/trainer.entity';
+import { TrainerQualification } from 'src/trainers/entities/qualification.entity';
 
 @Entity({
     name: "users"
@@ -28,7 +29,7 @@ export class User {
     status: string;
 
     @Column({default: false})
-    isAdmin: false
+    isAdmin: boolean
 
     @OneToOne(() => Subscription, (subscription) => subscription.user)
     subscription: Subscription;
@@ -45,5 +46,8 @@ export class User {
     @ManyToOne(() => Trainer, { nullable: true })
     @JoinColumn({ name: 'trainerId' })
     trainer?: Trainer;
+
+    @OneToMany(()=> TrainerQualification, (e)=> e.user)
+    qualifications: TrainerQualification[]
 
 }

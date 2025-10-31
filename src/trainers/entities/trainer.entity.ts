@@ -1,11 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
 import { Subscription } from '../../suscriptions/entities/subscription.entity';
+import { TrainerQualification } from './qualification.entity';
 
 @Entity()
 export class Trainer {
     @PrimaryGeneratedColumn('uuid')
-    id: string = uuidv4();
+    id: string;
 
     @Column()
     name: string;
@@ -19,6 +19,12 @@ export class Trainer {
     @Column({ nullable: true })
     imageUrl?: string;
 
+    @Column({default: 0})
+    qualification: number
+
     @Column({ default: true })
     available: boolean;
+
+    @OneToMany(()=> TrainerQualification, (e)=> e.trainer)
+    qualifications: TrainerQualification[]
 }

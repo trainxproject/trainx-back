@@ -1,13 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Trainer } from './entities/trainer.entity';
+import { CreateTrainerDto } from './dto/create-trainer.dto';
+import { User } from 'src/users/entities/user.entity';
+import { use } from 'passport';
+import { TrainerQualification } from './entities/qualification.entity';
 
 @Injectable()
 export class TrainersService {
+ 
   constructor(
     @InjectRepository(Trainer)
     private trainersRepository: Repository<Trainer>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(TrainerQualification)
+    private qualiRepository: Repository<TrainerQualification>
   ) {}
 
   async findAll() {
@@ -18,46 +27,52 @@ export class TrainersService {
     return this.trainersRepository.findOne({ where: { id } });
   }
 
-  async create(data: Partial<Trainer>) {
-    const trainer = this.trainersRepository.create(data);
-    return this.trainersRepository.save(trainer);
-  }
-
   async findByName(name: string) {
     return this.trainersRepository.findOne({ where: { name } });
   }
 
-  async seed() {
-    const trainers = [
-      {
-        name: 'Antonella Miracle',
-        specialization: 'Entrenadora olímpica de powerlifting, especializada en técnica y planificación de fuerza, con integración de control mental y conciencia corporal a partir de su maestría en psicología deportiva y formación avanzada en telas aéreas.',
-        imageUrl: 'https://res.cloudinary.com/dxpqhpme3/image/upload/v1761433928/antonella-miracle_bbhthd.jpg',
-      },
-      {
-        name: 'Lucas Romero',
-        specialization: 'Entrenador especializado en fuerza explosiva, enfocado en mejorar técnica, potencia y rendimiento en competiciones. Experiencia en programas de hipertrofia y resistencia muscular, combinando entrenamiento funcional y planificación de cargas.',
-        imageUrl: 'https://res.cloudinary.com/dxpqhpme3/image/upload/v1761433927/lucas-romero_egpv6j.jpg',
-      },
-      {
-        name: 'Sofía Torres',
-        specialization: 'Entrenadora especializada en entrenamiento correctivo, movilidad articular y prevención de lesiones en fuerza. Experta en diseño de programas de acondicionamiento funcional, fortalecimiento muscular equilibrado y técnicas de recuperación.',
-        imageUrl: 'https://res.cloudinary.com/dxpqhpme3/image/upload/v1761433928/sofia-torres_duljzi.jpg',
-      },
-      {
-        name: 'Uriel Rodríguez',
-        specialization: 'Entrenador especializado en desarrollo de hipertrofia y acondicionamiento físico integral. Experto en planificación de rutinas adaptadas a diferentes niveles, combinando técnica y resistencia para mejorar el rendimiento general.',
-        imageUrl: 'https://res.cloudinary.com/dxpqhpme3/image/upload/v1761433928/uriel-rodriguez_i1hip2.jpg',
-      },
-    ];
+  async create(data: CreateTrainerDto) {
 
-    for (const trainer of trainers) {
-      const exists = await this.findByName(trainer.name);
-      if (!exists) {
-        await this.create(trainer);
-      }
+    const createTrainers = this.trainersRepository.create(data)
+    
+    return await this.trainersRepository.save(createTrainers)
+  }
+
+  async createQuali(idTrainer: string, idUser: any, rating:number) {
+
+    const user = await this.userRepository.findOne({where: {id: idUser}})
+    if(!user) throw new NotFoundException("User not found")
+    const trainer = await this.trainersRepository.findOne({where: {id: idTrainer}})
+    if(!trainer) throw new NotFoundException("The Trainer not exist")
+
+    if(rating < 1 || rating > 5){
+      throw new BadRequestException("The qualification is invalid")
     }
 
-    return { message: 'Trainers seeded successfully ✅' };
+    const qualiCreate = this.qualiRepository.create({
+      user,
+      trainer,
+      rating
+    })
+
+    await this.qualiRepository.save(qualiCreate)
+
+    const qualiVerify = await this.qualiRepository.find({
+      where: {trainer: {id: trainer.id}}
+    })
+
+
+    const average = qualiVerify.reduce((sum, q)=> sum + q.rating  ,0) / qualiVerify.length;
+
+    trainer.qualification = parseFloat(average.toFixed(1))
+    await this.trainersRepository.save(trainer)
+
+    return {
+    message: 'Trainer qualified successfully',
+    average: trainer.qualification,
+    };
+
+
   }
+
 }

@@ -57,7 +57,7 @@ export class MpService {
                     currency_id: plan?.currency,
                     description: plan?.type
                 }
-                ],
+            ],
                 back_urls: {
                     success: 'https://attractive-saponaceous-cleo.ngrok-free.dev/mp/success',
                     failure: 'https://attractive-saponaceous-cleo.ngrok-free.dev/mp/failure',
@@ -67,6 +67,10 @@ export class MpService {
                 external_reference: user?.id
             }
         })
+
+
+
+        
          return result
 
             
@@ -75,10 +79,6 @@ export class MpService {
         console.error('❌ Error creando preferencia MP:', error);
         throw new Error(`No se pudo crear el pago: ${error.message}`);
     }
-
-
-
-       
     }
 
     async processPayment(id: string) {
@@ -94,7 +94,7 @@ export class MpService {
             where: {MpPaymentId: String(pay.id)}
         })
 
-         const plan = pay.additional_info?.items?.[0].id
+        const plan = pay.additional_info?.items?.[0].id
         const user = pay.external_reference
 
         if(!existingPayment){
