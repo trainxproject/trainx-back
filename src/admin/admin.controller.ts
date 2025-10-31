@@ -41,4 +41,35 @@ export class AdminController {
   async getUsersList() {
     return this.adminService.getUsersList();
 }
+
+  @Get('statistics/monthly-revenue')
+  @ApiOperation({ summary: 'Get total monthly revenue from all paid subscriptions' })
+  @ApiResponse({ status: 200, description: 'Returns total monthly revenue' })
+  async getMonthlyRevenue() {
+    return this.adminService.getMonthlyRevenue();
+}
+
+  @Get('statistics/plans/3-days')
+  @ApiOperation({ summary: 'Get count of 3-day plans purchased' })
+  @ApiResponse({ status: 200, description: 'Returns count of 3-day plans' })
+  async get3DaysPlansCount() {
+    return this.adminService.getPlansCountByType('3_days');
+}
+
+  @Get('statistics/plans/5-days')
+  @ApiOperation({ summary: 'Get count of 5-day plans purchased' })
+  @ApiResponse({ status: 200, description: 'Returns count of 5-day plans' })
+  async get5DaysPlansCount() {
+    return this.adminService.getPlansCountByType('5_days');
+}
+
+  @Patch('users/:id/activate')
+  async activateUser(@Param('id') id: string) {
+    return this.adminService.activateUser(id);
+}
+
+  @Patch('users/:id/deactivate')
+  async deactivateUser(@Param('id') id: string) {
+    return this.adminService.deactivateUser(id);
+}
 }

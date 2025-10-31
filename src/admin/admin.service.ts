@@ -128,4 +128,48 @@ export class AdminService {
       };
     });
   }
+
+  async getMonthlyRevenue() {
+    const allUsers = await this.usersService.findAll();
+    
+    const totalRevenue = allUsers
+      .filter(user => user.subscription?.isActive)
+      .reduce((sum, user) => {
+        return sum + Number(user.subscription.amount);
+      }, 0);
+  
+    return {
+      totalMonthlyRevenue: totalRevenue,
+      currency: 'ARS',
+      activeSubscriptions: allUsers.filter(u => u.subscription?.isActive).length
+    };
+  }
+  
+  async getPlansCountByType(planType: '3_days' | '5_days') {
+    const allUsers = await this.usersService.findAll();
+    
+    const count = allUsers.filter(user => 
+      user.subscription?.type === planType
+    ).length;
+  
+    return {
+      planType,
+      count,
+      description: planType === '3_days' ? '3 días a la semana' : '5 días a la semana'
+    };
+  }
+
+  async activateUser(id: string) {
+    const user = await this.usersService.findOne(id);
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    user.status = 'active';
+    return await this.usersService.saveStatus(user);
+  }
+  
+  async deactivateUser(id: string) {
+    const user = await this.usersService.findOne(id);
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    user.status = 'inactive';
+    return await this.usersService.saveStatus(user);
+  }
 }
