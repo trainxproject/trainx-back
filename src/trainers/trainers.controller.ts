@@ -29,7 +29,7 @@ export class TrainersController {
   }
 
   @Post(":id")
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(JwtAuthGuard)
   async quali(
     @Param("id", new ParseUUIDPipe()) idTrainer: string,
     @Body("rating")  rating: number,

@@ -13,17 +13,13 @@ export class JwtAuthGuard extends AuthGuard("jwt"){}
 
 export class AdminGuard implements CanActivate {
     
-    
-    
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     
             const request = context.switchToHttp().getRequest()
-            console.log(request);
-            
+
 
             const user = request.user
-            console.log(user);
-            
+           
 
             if (!user) {
             throw new ForbiddenException('No user information found in request. Make sure JwtAuthGuard runs first.');

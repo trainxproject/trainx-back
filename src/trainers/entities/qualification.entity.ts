@@ -10,12 +10,12 @@ export class TrainerQualification {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @ManyToOne(() => User, (user) => user.qualifications)
+    @ManyToOne(() => User, (user) => user.qualifications,  { onDelete: "CASCADE" })
     user: User;
 
-    @ManyToOne(() => Trainer, (trainer) => trainer.qualifications)
+    @ManyToOne(() => Trainer, (trainer) => trainer.qualifications, {onDelete: "CASCADE"})
     trainer: Trainer;
 
-    @Column({default: 0})
+    @Column({type: "decimal", precision: 2, scale:1,  default: 0})
     rating: number;
 }
