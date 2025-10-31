@@ -81,7 +81,7 @@ export class AuthService {
       });
     }
   
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, isAdmin: user.isAdmin};
     return this.jwtService.sign(payload);
   }
 }
