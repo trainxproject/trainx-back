@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 @Entity()
 export class Schedule {
     @PrimaryGeneratedColumn("uuid")
-    id: string = uuidv4();
+    id: string;
 
     @Column()
     dayOfWeek: string; 
