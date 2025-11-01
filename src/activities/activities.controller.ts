@@ -130,4 +130,10 @@ export class ActivitiesController {
         if (!id) throw new BadRequestException('Valid ID must be provided');
         return this.activitiesService.deleteActivity(id);
     }
+
+
+    
+
+
+
 }

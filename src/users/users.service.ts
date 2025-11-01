@@ -1,18 +1,26 @@
-import { BadRequestException, Get, Injectable, NotFoundException, Param } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Get, Injectable, NotFoundException, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Trainer } from '../trainers/entities/trainer.entity';
+import { Plan } from 'src/plans/plan.entity';
+import { Pay } from 'src/payments/entities/payment.entity';
 
 @Injectable()
 export class UsersService {
+    
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
         private readonly cloudinaryService: CloudinaryService,
         @InjectRepository(Trainer)
-        private trainersRepository: Repository<Trainer>
+        private trainersRepository: Repository<Trainer>,
+        @InjectRepository(Plan)
+        private planRepository: Repository<Plan>,
+        @InjectRepository(Pay)
+        private subscriptionRepository: Repository<Pay>
+
     ) {}
 
     async findAll(): Promise<User[]> {
@@ -28,6 +36,25 @@ export class UsersService {
             where: { id },
             relations: ['trainer'],
         });
+    }
+
+    async planUserService(userId: any) {
+
+        const user = await this.usersRepository.findOne({
+            where: {id: userId}
+        })
+
+        if(!user) throw new NotFoundException("User not Found")
+        
+        const planSub = await this.subscriptionRepository.findOne({
+            where: {user: {id: user.id}},
+            relations: ["user", "plan"]
+        })
+        
+        if(!planSub) throw new NotFoundException("Plan not found")
+        if(planSub.paid === false) throw new ForbiddenException("Purchase a Plan to access all the benefits.")
+
+        return planSub.plan
     }
 
     async create(user: Partial<User>) {
