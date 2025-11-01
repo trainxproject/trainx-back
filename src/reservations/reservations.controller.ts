@@ -1,7 +1,8 @@
-import { Controller, Post, Body, Delete, Param, BadRequestException, Get } from '@nestjs/common';
+import { Controller, Post, Body, Delete, Param, BadRequestException, Get, Req, ParseUUIDPipe, UseGuards, Patch } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CancelReservationDto } from "./dtos/cancel-reservation.dto"
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/admin.guard';
 
 @ApiTags('Reservations')
 @Controller('reservations')
@@ -21,7 +22,8 @@ export class ReservationsController {
         return this.reservationsService.findUserReservations(userId);
     }
 
-    @Post()
+    @UseGuards(JwtAuthGuard)
+    @Post(":id")
     @ApiOperation({ summary: 'Create a new reservation' })
     @ApiBody({ 
         description: 'Reservation data',
@@ -39,13 +41,15 @@ export class ReservationsController {
     @ApiResponse({ status: 404, description: 'User or schedule not found' })
     @ApiResponse({ status: 409, description: 'Reservation already exists or schedule is full' })
     async createReservation(
-        @Body() body: { userId: string; scheduleId: string },
+        @Param("id", new ParseUUIDPipe()) scheduleId: string ,
+        @Req() req: any
     ) {
-        const { userId, scheduleId } = body;
+        const userId = req.user.id
         return this.reservationsService.createReservation(userId, scheduleId);
     }
 
-    @Delete(':id')
+    @UseGuards(JwtAuthGuard)
+    @Patch(':id')
     @ApiOperation({ summary: 'Cancel a reservation' })
     @ApiParam({ name: 'id', description: 'Reservation ID' })
     @ApiBody({ type: CancelReservationDto })
@@ -54,11 +58,22 @@ export class ReservationsController {
     @ApiResponse({ status: 404, description: 'Reservation not found' })
     @ApiResponse({ status: 403, description: 'User not authorized to cancel this reservation' })
     async cancelReservation(
-        @Param('id') id: string,
-        @Body() body: CancelReservationDto,
+        @Param('id', new ParseUUIDPipe()) id: string,
+        @Req() req: any
     ) {
-        const { userId } = body;
-        if (!userId) throw new BadRequestException('UserId is required in the body to authorize cancellation');
+        const userId = req.user.id
         return this.reservationsService.cancelReservation(id, userId);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete(":id")
+    async deleteReservation(
+        @Param("id", new ParseUUIDPipe())  id: string,
+        @Req() req: any
+    ){
+        const userId = req.user.id
+        await this.reservationsService.deleteReservation(id, userId);
+        return {message: "Reservation deleted successfully"}
+    }
+
 }

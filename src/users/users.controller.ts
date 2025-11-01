@@ -73,4 +73,10 @@ export class UsersController {
     async updateName(@Param('id') id: string, @Body() body: UpdateNameDto) {
         return this.usersService.updateName(id, body.name);
     }
+
+    async planUser (){
+
+    }
+
+
 }
