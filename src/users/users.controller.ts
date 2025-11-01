@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Delete, Param, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, Patch, ParseUUIDPipe, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { AssignTrainerDto } from './dtos/assign-trainer.dto';
 import { UpdateNameDto } from './dtos/update-name.dto';
+import { JwtAuthGuard } from 'src/auth/guards/admin.guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -29,6 +30,15 @@ export class UsersController {
     findUserTrainer(@Param('id') id: string) {
         return this.usersService.findUserTrainer(id);
     }
+
+
+    @Get("plan/:id")
+    async planUser(
+        @Param("id", new ParseUUIDPipe()) userId: string,
+    ){
+        return this.usersService.planUserService(userId);
+    }
+
 
     @Post()
     @ApiOperation({ summary: 'Create a new user in the platform' })
@@ -74,9 +84,6 @@ export class UsersController {
         return this.usersService.updateName(id, body.name);
     }
 
-    async planUser (){
-
-    }
-
+   
 
 }
