@@ -4,13 +4,25 @@ export const Plans = [
         price: 1500,
         type: "week-3",
         currency: "ARS",  
-        features: "Full access to our gym, 3 days a week."
+        features:  [
+            'Acceso 3 días a la semana',
+            'Todas las clases grupales',
+            'Uso de instalaciones',
+            'Asesoría inicial',
+            'Rutinas personalizadas (chatbot)',
+        ],
     },
     {
         name: "5-Day Weekly Plan",
         price: 2500,
         type: "week-5",
         currency: "ARS",  
-        features: "Full access to our gym, 5 days a week."
+        features: [
+            'Acceso 5 días a la semana',
+            'Todas las clases grupales',
+            'Uso de instalaciones premium',
+            'Entrenador personal asignado',
+            'Rutinas personalizadas (chatbot)',
+        ],
     }
 ]
