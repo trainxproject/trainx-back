@@ -2,11 +2,11 @@ import { Controller, Post, Body, UseGuards, Get, Req, Res } from '@nestjs/common
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import type { Response, Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { JwtAuthGuard } from './guards/admin.guard';
 
 @ApiTags('Auth')
 @Controller('auth')

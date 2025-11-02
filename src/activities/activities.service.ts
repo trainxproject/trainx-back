@@ -6,10 +6,26 @@ import { UpdateActivityDto } from './dtos/update-activity.dto';
 
 @Injectable()
 export class ActivitiesService {
+    
     constructor(
         @InjectRepository(Activity)
         private readonly activityRepository: Repository<Activity>,
     ) {}
+
+
+    async filterService(name: string) {
+        const query = await this.activityRepository
+        .createQueryBuilder("act")
+        .leftJoinAndSelect("act.schedules", "schedule")
+
+        if(name){
+            query.where("LOWER(act.name) LIKE LOWER(:name)", {name: `${name}`})
+        }
+
+        const activities = await query.getMany()
+        return activities
+
+    }
 
     findAll() {
         return this.activityRepository.find({ relations: ['schedules'] });

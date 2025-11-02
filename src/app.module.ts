@@ -15,6 +15,7 @@ import { PlanSeeder } from './plans/plan.seeder';
 import { TrainersModule } from './trainers/trainers.module';
 import { PlanModule } from './plans/plan.module';
 import { MercadoPagoModule } from './mercadopago/mercado.module';
+import { TrainerSeeder } from './trainers/trainer.seeder';
 
 @Module({
   imports: [
@@ -51,13 +52,13 @@ import { MercadoPagoModule } from './mercadopago/mercado.module';
   ],
 })
 export class AppModule implements OnApplicationBootstrap {
- 
-  
 
-  
-  constructor(private readonly plans: PlanSeeder){}
+  constructor(
+    private readonly plans: PlanSeeder,
+    private readonly trainer: TrainerSeeder
+  ){}
   async onApplicationBootstrap() {
-   await this.plans.run()
-
+  await this.plans.run()
+  await this.trainer.onInitTrainer()
   }
 }

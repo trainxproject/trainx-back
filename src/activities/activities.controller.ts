@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, BadRequestException, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, BadRequestException, Put, Delete, Query } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import * as path from 'path';
@@ -12,6 +12,17 @@ export class ActivitiesController {
         private readonly activitiesService: ActivitiesService,
         private readonly cloudinaryService: CloudinaryService
     ) {}
+
+
+    @Get("filter")
+    async filter(
+        @Query("name") name: string
+    ){
+
+        return this.activitiesService.filterService(name);
+
+    }
+
 
     @Get()
     @ApiOperation({ summary: 'Get all activities' })
@@ -130,4 +141,5 @@ export class ActivitiesController {
         if (!id) throw new BadRequestException('Valid ID must be provided');
         return this.activitiesService.deleteActivity(id);
     }
+
 }
