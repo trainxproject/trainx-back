@@ -17,19 +17,21 @@ export class AuthService {
   // Registro: hashea password y crea usuario
   async register(dto: CreateUserDto) {
 
+    
+    const existing = await this.usersService.findByEmail(dto.email);
+    if (existing) throw new BadRequestException('Email ya registrado');
+
     if (dto.password !== dto.confirmPassword) {
       throw new BadRequestException('Password y Confirm Password no coinciden');
     }
-    const existing = await this.usersService.findByEmail(dto.email);
-    if (existing) throw new BadRequestException('Email ya registrado');
 
     const hashed = await bcrypt.hash(dto.password, 10);
     const user = await this.usersService.create({
       name: dto.name,
       email: dto.email,
-      password: hashed,
+      password: hashed
     });
-    // opcional: no devolver password
+
     delete (user as any).password;
 
     await this.notificationService.sendWelcome({

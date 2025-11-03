@@ -123,13 +123,10 @@ export class MpService {
 
             await this.paymentRepo.save(newOrder)
             console.log('💾 Nuevo pago guardado:', newOrder);
-<<<<<<< HEAD
-
-
-=======
+            
            await this.notificationService.sendPaymentNotification(
                userObj.email, userObj.name)
->>>>>>> 9f562c705465ee9a2fec761e63889e447f7da3a6
+
         } else {
 
             if (!existingPayment?.id) {
