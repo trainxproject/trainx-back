@@ -35,7 +35,7 @@ export class PlanService {
                 status: PlansStatus.ACTIVE
             })
         
-        return createPlan
+        return await this.planRepo.save(createPlan);
 
     }
     async modify(plan: partialDto, userId: string, planId: string){
@@ -47,7 +47,7 @@ export class PlanService {
 
         const modify = await this.planRepo.merge(searchPlan, plan)
 
-        return modify;
+        return await this.planRepo.save(modify);
     }
 
 
@@ -58,7 +58,7 @@ export class PlanService {
         const searchPlan = await this.planRepo.findOne({where: {id: id}})
         if(!searchPlan) throw new NotFoundException("Plan not found.")
          
-        return await this.planRepo.delete(searchPlan); 
+        return await this.planRepo.delete(id); 
     }
 
     async status(id: string, userId:string){
