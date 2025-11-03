@@ -63,9 +63,9 @@ export class MpService {
                 }
             ],
                 back_urls: {
-                    success: 'https://attractive-saponaceous-cleo.ngrok-free.dev/mp/success',
-                    failure: 'https://attractive-saponaceous-cleo.ngrok-free.dev/mp/failure',
-                    pending: 'https://attractive-saponaceous-cleo.ngrok-free.dev/mp/pending',
+                    success: 'https://56vtzh7b-3000.brs.devtunnels.ms/mp/success',
+                    failure: 'https://56vtzh7b-3000.brs.devtunnels.ms/mp/failure',
+                    pending: 'https://56vtzh7b-3000.brs.devtunnels.ms/mp/pending',
                 },
                 notification_url: `${process.env.WEBHOOK_URL}?token=${process.env.WEBHOOK_TOKEN}`,
                 external_reference: user?.id

@@ -18,9 +18,10 @@ export class planDto {
     @Matches(/^[A-Z]{3}$/, { message: "Accepts only 3-letter uppercase codes." })
     currency: string;
 
-    @ApiProperty({ example: '10 pins/month, Basic search' })
-    @IsString()
-    features: string;
+    @IsArray()
+    @ArrayNotEmpty()
+    @IsString({ each: true })
+    features: string[];
     
   }
 

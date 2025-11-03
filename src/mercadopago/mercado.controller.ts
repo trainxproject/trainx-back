@@ -59,7 +59,7 @@ export class MpController {
     
     @Get('success')
     handleSuccess(@Res() res: any ) {
-        return res.redirect("http://localhost:3001/dashboard/user")
+        return res.redirect("https://56vtzh7b-3001.brs.devtunnels.ms/dashboard/user")
     }
 
     @Get('failure')
