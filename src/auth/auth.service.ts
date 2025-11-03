@@ -1,7 +1,8 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+// import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
 
@@ -15,6 +16,10 @@ export class AuthService {
 
   // Registro: hashea password y crea usuario
   async register(dto: CreateUserDto) {
+
+    if (dto.password !== dto.confirmPassword) {
+      throw new BadRequestException('Password y Confirm Password no coinciden');
+    }
     const existing = await this.usersService.findByEmail(dto.email);
     if (existing) throw new BadRequestException('Email ya registrado');
 
