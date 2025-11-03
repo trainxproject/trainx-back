@@ -25,7 +25,7 @@ export class Plan {
     @Column({type: "varchar", default: "USD"})
     currency: string
 
-    @Column("simple-array")
+    @Column("simple-array", { nullable: true })
     features: string[];
 
     @Column({
