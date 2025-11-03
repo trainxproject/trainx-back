@@ -8,7 +8,10 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe())
 
   app.enableCors({
-    origin: 'http://localhost:3001', 
+    origin: [
+      'https://trainx-front.vercel.app/',
+      'http://localhost:3001'
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true, 
   })

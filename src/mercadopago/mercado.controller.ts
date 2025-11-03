@@ -59,7 +59,7 @@ export class MpController {
     
     @Get('success')
     handleSuccess(@Res() res: any ) {
-        return res.redirect("https://56vtzh7b-3001.brs.devtunnels.ms/dashboard/user")
+        return res.redirect("https://trainx-front.vercel.app/dashboard/user")
     }
 
     @Get('failure')
