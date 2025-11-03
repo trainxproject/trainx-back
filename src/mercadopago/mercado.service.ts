@@ -88,7 +88,6 @@ export class MpService {
         const payResponse = await myPayment.get({id: id})
         const pay = payResponse; 
 
-        // if (!pay?.id) throw new NotFoundException('Payment not found');
         console.log('📦 Pago verificado:', pay);
 
         const existingPayment = await this.paymentRepo.findOne({
@@ -118,6 +117,8 @@ export class MpService {
 
             await this.paymentRepo.save(newOrder)
             console.log('💾 Nuevo pago guardado:', newOrder);
+
+
         } else {
 
             if (!existingPayment?.id) {
