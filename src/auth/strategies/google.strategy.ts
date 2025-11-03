@@ -36,6 +36,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
             return {
             email: profile.emails[0].value,
             name: profile.displayName || profile.emails[0].value,
+    
             };
         }
 }

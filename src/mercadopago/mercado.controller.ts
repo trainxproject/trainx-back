@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Post, Query} from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, Req, Res, UseGuards} from "@nestjs/common";
 import { MpService } from "./mercado.service";
+import { AuthGuard } from "@nestjs/passport";
 
 
 @Controller("mp")
@@ -9,34 +10,44 @@ export class MpController {
 
     constructor(private readonly service: MpService){}
     
-    @Post('preference')
+    @Post('preference/:id')
+    @UseGuards(AuthGuard("jwt"))
     async preferencePay (
-        @Body() paymentData: any
+        @Param("id", new ParseUUIDPipe()) idPlan: string,
+        @Body() paymentData: any,
+        @Req() req
     ){
-        const preference = await this.service.CreatePreference(paymentData)
+        const id = req.user.id
+        const preference = await this.service.CreatePreference(paymentData, id, idPlan)
         return {
             init_point: preference.init_point,
             external_reference: preference.external_reference
-        }}
-
-
+        }
+    }
     
     
     @Post("webhook")
     async notification(@Body() body: any, @Query() query: any){
             console.log('🔔 Webhook recibido:', body, query);
 
-           
+            const topic =
+                query.topic ||
+                body.topic ||
+                body.type || 
+                body.action?.split('.')[0]; 
 
-              const topic = body.topic;
-            const id = body.data?.id || body.id;
+            const id =
+                query.id ||
+                body.id ||
+                body.data?.id ||
+                (body.resource ? body.resource.split('/').pop() : null);
 
-            if(topic === "subscription_preapproval" && id){
-                await this.service.processSubscription(id);
+            if(topic === "merchant_order" && id){
+                await this.service.processMerchant(id);
             } else if(topic === "payment" && id){
                 await this.service.processPayment(id);
-            } else {
-                  console.log('⚠️ Tipo de notificación no manejada:', topic);
+            } else{
+                console.log('⚠️ Tipo de notificación no manejada:', topic);
             }
 
             
@@ -47,8 +58,8 @@ export class MpController {
     
     
     @Get('success')
-    handleSuccess(@Query() query: any) {
-        return { message: 'Pago aprobado ✅', data: query };
+    handleSuccess(@Res() res: any ) {
+        return res.redirect("https://56vtzh7b-3001.brs.devtunnels.ms/dashboard/user")
     }
 
     @Get('failure')

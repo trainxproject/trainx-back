@@ -25,10 +25,10 @@ export class PaymentsController {
     return this.paymentsService.create(body);
   }
 
-  // @Patch(':id/pay')
-  // @ApiOperation({ summary: 'Mark an existing payment as paid' })
-  // markAsPaid(@Param('id') id: string) {
-  //   return this.paymentsService.markAsPaid(id);
-  // }
+  @Patch(':id/pay')
+  @ApiOperation({ summary: 'Mark an existing payment as paid' })
+  markAsPaid(@Param('id') id: string) {
+    return this.paymentsService.markAsPaid(id);
+  }
 }
 

@@ -1,7 +1,10 @@
-import { Controller, Get, Post, Delete, Param, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, Patch, ParseUUIDPipe, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { AssignTrainerDto } from './dtos/assign-trainer.dto';
+import { UpdateNameDto } from './dtos/update-name.dto';
+import { JwtAuthGuard } from 'src/auth/guards/admin.guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -22,6 +25,20 @@ export class UsersController {
     findOne(@Param('id') id: string) {
         return this.usersService.findOne(id);
     }
+
+    @Get(':id')
+    findUserTrainer(@Param('id') id: string) {
+        return this.usersService.findUserTrainer(id);
+    }
+
+
+    @Get("plan/:id")
+    async planUser(
+        @Param("id", new ParseUUIDPipe()) userId: string,
+    ){
+        return this.usersService.planUserService(userId);
+    }
+
 
     @Post()
     @ApiOperation({ summary: 'Create a new user in the platform' })
@@ -47,4 +64,26 @@ export class UsersController {
     async uploadProfilePicture(@Param('id') id: string, @Body() body: { imageUrl: string }) {
         return this.usersService.uploadProfilePicture(id, body.imageUrl);
     }
+
+    @Patch(':id/trainer')
+    @ApiOperation({ summary: 'Asigna un entrenador al usuario (solo si pagó la suscripción)' })
+    @ApiResponse({ status: 200, description: 'Entrenador asignado correctamente' })
+    assignTrainer(
+        @Param('id') id: string,
+        @Body() body: AssignTrainerDto,
+    ) {
+        return this.usersService.assignTrainer(id, body.trainerId);
+    }
+    
+    @Patch(':id/name')
+    @ApiOperation({ summary: 'Actualizar el nombre de un usuario específico' })
+    @ApiParam({ name: 'id', description: 'ID del usuario a actualizar', type: String })
+    @ApiBody({ type: UpdateNameDto })
+    @ApiResponse({ status: 200, description: 'Returns the user with the updated name.' })
+    async updateName(@Param('id') id: string, @Body() body: UpdateNameDto) {
+        return this.usersService.updateName(id, body.name);
+    }
+
+   
+
 }

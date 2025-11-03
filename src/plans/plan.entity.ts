@@ -25,8 +25,8 @@ export class Plan {
     @Column({type: "varchar", default: "USD"})
     currency: string
 
-    @Column({length: 50})
-    features: string
+    @Column("simple-array")
+    features: string[];
 
     @Column({
         type: "enum",

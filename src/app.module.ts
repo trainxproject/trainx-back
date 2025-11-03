@@ -8,10 +8,14 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AdminModule } from './admin/admin.module';
 import { PaymentsModule } from './payments/payments.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ActivitiesModule } from './activities/activities.module';
+import { SchedulesModule } from './schedules/schedules.module';
+import { ReservationsModule } from './reservations/reservations.module';
 import { PlanSeeder } from './plans/plan.seeder';
+import { TrainersModule } from './trainers/trainers.module';
 import { PlanModule } from './plans/plan.module';
 import { MercadoPagoModule } from './mercadopago/mercado.module';
-
+import { TrainerSeeder } from './trainers/trainer.seeder';
 
 @Module({
   imports: [
@@ -44,6 +48,10 @@ import { MercadoPagoModule } from './mercadopago/mercado.module';
     AdminModule,
     PaymentsModule,
     NotificationsModule,
+    ActivitiesModule,
+    SchedulesModule,
+    ReservationsModule,
+    TrainersModule,
     PlanModule,
     MercadoPagoModule
   ],
@@ -51,13 +59,13 @@ import { MercadoPagoModule } from './mercadopago/mercado.module';
 
 
 export class AppModule implements OnApplicationBootstrap {
- 
-  
 
-  
-  constructor(private readonly plans: PlanSeeder){}
+  constructor(
+    private readonly plans: PlanSeeder,
+    private readonly trainer: TrainerSeeder
+  ){}
   async onApplicationBootstrap() {
-   await this.plans.run()
-
+  await this.plans.run()
+  await this.trainer.onInitTrainer()
   }
 }

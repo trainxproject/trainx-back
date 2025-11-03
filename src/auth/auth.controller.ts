@@ -2,10 +2,11 @@ import { Controller, Post, Body, UseGuards, Get, Req, Res } from '@nestjs/common
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import type { Response, Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { JwtAuthGuard } from './guards/admin.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -40,7 +41,8 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Redirect the user to Google for authentication' })
   @ApiResponse({ status: 302, description: 'Redirects to Google login page.' })
-  async googleLogin() {
+  async googleLogin(@Req() req: any) {
+    
     return { msg: 'Redirecting to Google...' };
   }
 
@@ -50,8 +52,11 @@ export class AuthController {
   @ApiResponse({ status: 302, description: 'Redirects the user to frontend with JWT token.' })
   async googleCallback(@Req() req: Request, @Res() res: Response) {
     const user = req.user;
+    console.log(req.user
+
+    )
     const jwt = await this.authService.validateGoogleUser(user);
-    return res.redirect(`http://localhost:5173?token=${jwt}`);
+    return res.redirect(`http://localhost:3001?token=${jwt}`);
   }
 
 
