@@ -8,6 +8,7 @@ import { User } from "src/users/entities/user.entity";
 import { addDays } from "src/utils/date.util";
 import { mapStatus } from "src/utils/status.util";
 import { DeepPartial, Repository } from "typeorm";
+import { NotificationsService } from "src/notifications/notifications.service";
 
 
 @Injectable()
@@ -25,7 +26,8 @@ export class MpService {
         @InjectRepository(User)
         private readonly userRepo: Repository<User>,
         @InjectRepository(Plan)
-        private readonly planRepo: Repository<Plan>
+        private readonly planRepo: Repository<Plan>,
+        private readonly notificationService: NotificationsService
     ){
         this.client =  
         new  MercadoPagoConfig({accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN as string}) 
@@ -95,8 +97,12 @@ export class MpService {
         })
 
         const plan = pay.additional_info?.items?.[0].id
-        const user = pay.external_reference
+        const user = pay.external_reference;
+        const userObj = await this.userRepo.findOne({where: {id: user}});
 
+        if(!userObj){
+            throw new NotFoundException('Usuario no encontrado');
+        }
         if(!existingPayment){
         
             const newPayment: DeepPartial<Pay> = ({
@@ -117,8 +123,13 @@ export class MpService {
 
             await this.paymentRepo.save(newOrder)
             console.log('💾 Nuevo pago guardado:', newOrder);
+<<<<<<< HEAD
 
 
+=======
+           await this.notificationService.sendPaymentNotification(
+               userObj.email, userObj.name)
+>>>>>>> 9f562c705465ee9a2fec761e63889e447f7da3a6
         } else {
 
             if (!existingPayment?.id) {

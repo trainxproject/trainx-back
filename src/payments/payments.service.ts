@@ -34,7 +34,6 @@ export class PaymentsService {
       saved.paid = true;
       await this.subscriptionsRepository.save(saved.subscription);
     }
-  
     return saved;
   }
 
