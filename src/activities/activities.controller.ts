@@ -18,9 +18,7 @@ export class ActivitiesController {
     async filter(
         @Query("name") name: string
     ){
-
         return this.activitiesService.filterService(name);
-
     }
 
 

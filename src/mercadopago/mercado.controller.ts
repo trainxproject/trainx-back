@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, Req, UseGuards} from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, Req, Res, UseGuards} from "@nestjs/common";
 import { MpService } from "./mercado.service";
 import { AuthGuard } from "@nestjs/passport";
 
@@ -22,9 +22,8 @@ export class MpController {
         return {
             init_point: preference.init_point,
             external_reference: preference.external_reference
-        }}
-
-
+        }
+    }
     
     
     @Post("webhook")
@@ -59,8 +58,8 @@ export class MpController {
     
     
     @Get('success')
-    handleSuccess(@Query() query: any) {
-        return { message: 'Pago aprobado ✅', data: query };
+    handleSuccess(@Res() res: any ) {
+        return res.redirect("https://56vtzh7b-3001.brs.devtunnels.ms/dashboard/user")
     }
 
     @Get('failure')

@@ -1,4 +1,4 @@
-import { Body, Controller, Injectable, NotFoundException } from "@nestjs/common";
+import { Body, ConflictException, Controller, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { MercadoPagoConfig, Payment, PreApproval, Preference, MerchantOrder} from 'mercadopago';
 import { PlansEnum} from "src/pay.enum";
@@ -34,7 +34,6 @@ export class MpService {
     async CreatePreference(paymentData: any, id:string, idPlan: string) {
 
         try {
-            console.log('📩 Body recibido:', paymentData);
             const preference = new Preference(this.client)
 
             const user = await this.userRepo.findOne({
@@ -45,6 +44,11 @@ export class MpService {
                 where: {id: idPlan}
             })
 
+        const subs = await this.paymentRepo.findOne({
+            where: {user: {id: user?.id}}
+        })    
+
+        if(subs) throw new ForbiddenException("You already have an active subscription.")
         
         const result = await preference.create({
             body: {
@@ -59,25 +63,22 @@ export class MpService {
                 }
             ],
                 back_urls: {
-                    success: 'https://attractive-saponaceous-cleo.ngrok-free.dev/mp/success',
-                    failure: 'https://attractive-saponaceous-cleo.ngrok-free.dev/mp/failure',
-                    pending: 'https://attractive-saponaceous-cleo.ngrok-free.dev/mp/pending',
+                    success: 'https://56vtzh7b-3000.brs.devtunnels.ms/mp/success',
+                    failure: 'https://56vtzh7b-3000.brs.devtunnels.ms/mp/failure',
+                    pending: 'https://56vtzh7b-3000.brs.devtunnels.ms/mp/pending',
                 },
                 notification_url: `${process.env.WEBHOOK_URL}?token=${process.env.WEBHOOK_TOKEN}`,
                 external_reference: user?.id
             }
-        })
-
-
-
+        }
+    )
         
-         return result
-
-            
+        return result
+    
         } catch (error: any) {
     
         console.error('❌ Error creando preferencia MP:', error);
-        throw new Error(`No se pudo crear el pago: ${error.message}`);
+        throw new ConflictException(`No se pudo crear el pago: ${error.message}`);
     }
     }
 

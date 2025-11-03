@@ -23,8 +23,7 @@ export class ActivitiesService {
         }
 
         const activities = await query.getMany()
-        return activities
-
+        return activities;
     }
 
     findAll() {
