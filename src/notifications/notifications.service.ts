@@ -2,7 +2,7 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import sgMail from '@sendgrid/mail';
 import { SendEmailDto } from './dto/sendEmail.dto';
-import { CreateNotificationDto } from './dto/createNotification.dto';
+import { PaymentNotificationDto } from './dto/createNotification.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -48,24 +48,6 @@ El equipo de TrainX 💙
     };
   }
 
-  private buildActivityMessage(dto: CreateNotificationDto) {
-    const { type, photoTitle, comment } = dto;
-
-    if (type === 'like') {
-      return {
-        subject: `🎉 Tu foto "${photoTitle}" recibió un like!`,
-        message: `¡Alguien le dio like a tu foto "${photoTitle}" en TrainX! 💙`,
-      };
-    } else if (type === 'comment') {
-      return {
-        subject: `💬 Nuevo comentario en tu foto "${photoTitle}"`,
-        message: `Alguien comentó en tu foto "${photoTitle}":\n\n"${comment}"`,
-      };
-    } else {
-      throw new BadRequestException('Tipo de notificación inválido');
-    }
-  }
-
   private async sendEmail(to: string, subject: string, message: string) {
     try {
       const from = this.configService.get<string>('EMAIL_USER') || 'no-reply@trainx.com';
@@ -93,8 +75,10 @@ El equipo de TrainX 💙
     return this.sendEmail(dto.email, subject, message);
   }
 
-  async sendActivity(dto: CreateNotificationDto) {
-    const { subject, message } = this.buildActivityMessage(dto);
-    return this.sendEmail(dto.recipientEmail, subject, message);
+  async sendPaymentNotification(email: string, name: string) {
+    const subject = 'Pago exitoso ✅';
+    const message = `Hola ${name},\n\nTu pago ha sido recibido correctamente. Gracias por tu confianza.`;
+    return this.sendEmail(email, subject, message);
   }
+  
 }
