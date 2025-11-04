@@ -26,7 +26,7 @@ export class UsersController {
         return this.usersService.findOne(id);
     }
 
-    @Get(':id')
+    @Get('trainer/:id')
     @ApiOperation({ summary: 'Retrieve the trainer assigned to a specific user' })
     @ApiParam({ name: 'id', description: 'Unique ID of the user to check trainer assignment', type: String })
     @ApiResponse({ status: 200, description: 'Returns the trainer assigned to the specified user.' })
@@ -70,15 +70,17 @@ export class UsersController {
     }
 
     @Patch(':id/trainer')
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Assign a trainer to the user (only if they have an active subscription)' })
     @ApiParam({ name: 'id', description: 'User ID to assign trainer to', type: String })
     @ApiBody({ type: AssignTrainerDto })
     @ApiResponse({ status: 200, description: 'Trainer assigned successfully.' })
     assignTrainer(
         @Param('id') id: string,
-        @Body() body: AssignTrainerDto,
+        @Req() req: any
     ) {
-        return this.usersService.assignTrainer(id, body.trainerId);
+        const userId = req.user.id
+        return this.usersService.assignTrainer(id, userId);
     }
     
     @Patch(':id/name')
