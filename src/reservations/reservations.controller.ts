@@ -18,7 +18,7 @@ export class ReservationsController {
 
     @Get("user/:id")
     @ApiOperation({ summary: 'Get user reservations' })
-    findUserReservations(@Param('userId') userId: string) {
+    findUserReservations(@Param('id') userId: string) {
         return this.reservationsService.findUserReservations(userId);
     }
 
