@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Req, UseGuards } from '@nestjs/common';
 import { TrainersService } from './trainers.service';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CreateTrainerDto } from './dto/create-trainer.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
@@ -20,8 +20,10 @@ export class TrainersController {
 
   @Post()
   @UseGuards(JwtAuthGuard, AdminGuard)
-  @ApiOperation({ summary: 'Seed the default trainers into the database' })
-  @ApiResponse({ status: 201, description: 'Seeds four default trainers.' })
+  @ApiOperation({ summary: 'Create a new trainer' })
+  @ApiBody({ description: 'Trainer data to create a new trainer', type: CreateTrainerDto })
+  @ApiResponse({ status: 201, description: 'Trainer created successfully.' })
+  @ApiResponse({ status: 400, description: 'Invalid input data.' })
   async seed(
     @Body() data: CreateTrainerDto,
     ) {
@@ -30,6 +32,20 @@ export class TrainersController {
 
   @Post(":id")
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Rate a trainer' })
+  @ApiParam({ name: 'id', description: 'Trainer ID' })
+  @ApiBody({
+    description: 'Rating to assign to the trainer',
+    schema: {
+      type: 'object',
+      properties: {
+        rating: { type: 'number', example: 5 }
+      }
+    }
+  })
+  @ApiResponse({ status: 201, description: 'Rating successfully registered.' })
+  @ApiResponse({ status: 400, description: 'Invalid trainer ID or rating value.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized. User must be logged in.' })
   async quali(
     @Param("id", new ParseUUIDPipe()) idTrainer: string,
     @Body("rating")  rating: number,
@@ -40,6 +56,8 @@ export class TrainersController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Check rating status for trainers' })
+  @ApiResponse({ status: 200, description: 'Returns rating status.' })
   async qualiStatus(){
 
   }

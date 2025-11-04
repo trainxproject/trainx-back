@@ -1,4 +1,4 @@
-import { Body, Controller, Injectable, NotFoundException } from "@nestjs/common";
+import { Body, ConflictException, Controller, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { MercadoPagoConfig, Payment, PreApproval, Preference, MerchantOrder} from 'mercadopago';
 import { PlansEnum} from "src/pay.enum";
@@ -8,6 +8,7 @@ import { User } from "src/users/entities/user.entity";
 import { addDays } from "src/utils/date.util";
 import { mapStatus } from "src/utils/status.util";
 import { DeepPartial, Repository } from "typeorm";
+import { NotificationsService } from "src/notifications/notifications.service";
 
 
 @Injectable()
@@ -25,7 +26,8 @@ export class MpService {
         @InjectRepository(User)
         private readonly userRepo: Repository<User>,
         @InjectRepository(Plan)
-        private readonly planRepo: Repository<Plan>
+        private readonly planRepo: Repository<Plan>,
+        private readonly notificationService: NotificationsService
     ){
         this.client =  
         new  MercadoPagoConfig({accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN as string}) 
@@ -34,7 +36,6 @@ export class MpService {
     async CreatePreference(paymentData: any, id:string, idPlan: string) {
 
         try {
-            console.log('📩 Body recibido:', paymentData);
             const preference = new Preference(this.client)
 
             const user = await this.userRepo.findOne({
@@ -45,6 +46,11 @@ export class MpService {
                 where: {id: idPlan}
             })
 
+        const subs = await this.paymentRepo.findOne({
+            where: {user: {id: user?.id}}
+        })    
+
+        if(subs) throw new ForbiddenException("You already have an active subscription.")
         
         const result = await preference.create({
             body: {
@@ -59,25 +65,22 @@ export class MpService {
                 }
             ],
                 back_urls: {
-                    success: 'https://attractive-saponaceous-cleo.ngrok-free.dev/mp/success',
-                    failure: 'https://attractive-saponaceous-cleo.ngrok-free.dev/mp/failure',
-                    pending: 'https://attractive-saponaceous-cleo.ngrok-free.dev/mp/pending',
+                    success: 'https://56vtzh7b-3000.brs.devtunnels.ms/mp/success',
+                    failure: 'https://56vtzh7b-3000.brs.devtunnels.ms/mp/failure',
+                    pending: 'https://56vtzh7b-3000.brs.devtunnels.ms/mp/pending',
                 },
                 notification_url: `${process.env.WEBHOOK_URL}?token=${process.env.WEBHOOK_TOKEN}`,
                 external_reference: user?.id
             }
-        })
-
-
-
+        }
+    )
         
-         return result
-
-            
+        return result
+    
         } catch (error: any) {
     
         console.error('❌ Error creando preferencia MP:', error);
-        throw new Error(`No se pudo crear el pago: ${error.message}`);
+        throw new ConflictException(`No se pudo crear el pago: ${error.message}`);
     }
     }
 
@@ -87,7 +90,6 @@ export class MpService {
         const payResponse = await myPayment.get({id: id})
         const pay = payResponse; 
 
-        // if (!pay?.id) throw new NotFoundException('Payment not found');
         console.log('📦 Pago verificado:', pay);
 
         const existingPayment = await this.paymentRepo.findOne({
@@ -95,8 +97,12 @@ export class MpService {
         })
 
         const plan = pay.additional_info?.items?.[0].id
-        const user = pay.external_reference
+        const user = pay.external_reference;
+        const userObj = await this.userRepo.findOne({where: {id: user}});
 
+        if(!userObj){
+            throw new NotFoundException('Usuario no encontrado');
+        }
         if(!existingPayment){
         
             const newPayment: DeepPartial<Pay> = ({
@@ -115,8 +121,12 @@ export class MpService {
             })
             const newOrder = this.paymentRepo.create(newPayment)
 
+            await this.notificationService.sendPaymentNotification(
+            userObj.email, userObj.name)
+
             await this.paymentRepo.save(newOrder)
             console.log('💾 Nuevo pago guardado:', newOrder);
+
         } else {
 
             if (!existingPayment?.id) {

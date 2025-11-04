@@ -32,10 +32,12 @@ export class UsersService {
     }
 
     async findUserTrainer(id: string) {
-        return this.usersRepository.findOne({
+        const user = await this.usersRepository.findOne({
             where: { id },
             relations: ['trainer'],
         });
+
+        return user?.trainer
     }
 
     async planUserService(userId: any) {
@@ -83,18 +85,26 @@ export class UsersService {
         return this.usersRepository.save(user);
     }
 
-    async assignTrainer(userId: string, trainerId: string) {
+    async assignTrainer(id:string, userId: string) {
+        
+
+
+
         const user = await this.usersRepository.findOne({
             where: { id: userId },
-            relations: ['trainer'],
+            relations: ['trainer', 'payments'],
         });
         if (!user) throw new NotFoundException('Usuario no encontrado');
-    
-        if (!user.hasPaid) {
+
+        const pay = await this.subscriptionRepository.findOne({
+            where: { user: {id: user.id} },
+        });
+
+        if (!pay) {
             throw new BadRequestException('El usuario aún no ha pagado su suscripción');
         }
     
-        const trainer = await this.trainersRepository.findOne({ where: { id: trainerId } });
+        const trainer = await this.trainersRepository.findOne({ where: { id: id } });
         if (!trainer) throw new NotFoundException('Entrenador no encontrado');
     
         if (!trainer.available) {
