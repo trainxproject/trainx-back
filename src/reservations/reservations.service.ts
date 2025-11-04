@@ -37,6 +37,7 @@ export class ReservationsService {
     async findUserReservations(userId: string) {
         return this.reservationRepository.find({
             where: { user: { id: userId } },
+            relations: ['user', 'schedule'],
         })
     }
 
