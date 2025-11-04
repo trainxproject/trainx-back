@@ -67,6 +67,11 @@ export class ReservationsController {
 
     @UseGuards(JwtAuthGuard)
     @Delete(":id")
+    @ApiOperation({ summary: 'Delete a reservation' })
+    @ApiParam({ name: 'id', description: 'Reservation ID' })
+    @ApiResponse({ status: 200, description: 'Reservation deleted successfully' })
+    @ApiResponse({ status: 404, description: 'Reservation not found' })
+    @ApiResponse({ status: 403, description: 'User not authorized to delete this reservation' })
     async deleteReservation(
         @Param("id", new ParseUUIDPipe())  id: string,
         @Req() req: any
