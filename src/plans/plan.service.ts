@@ -57,7 +57,7 @@ export class PlanService {
 
         const searchPlan = await this.planRepo.findOne({where: {id: id}})
         if(!searchPlan) throw new NotFoundException("Plan not found.")
-         
+        
         return await this.planRepo.delete(id); 
     }
 
