@@ -20,7 +20,7 @@ export class CreateUserDto {
     })
     password: string;
 
-    @ApiProperty({ description: 'Confirm password must match password', example: 'securePass123!' })
+  @ApiProperty({ description: 'Confirm password must match password', example: 'securePass123!' })
   @IsString()
   @IsNotEmpty()
   confirmPassword: string;

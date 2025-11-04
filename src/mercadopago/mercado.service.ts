@@ -121,11 +121,11 @@ export class MpService {
             })
             const newOrder = this.paymentRepo.create(newPayment)
 
+            await this.notificationService.sendPaymentNotification(
+            userObj.email, userObj.name)
+
             await this.paymentRepo.save(newOrder)
             console.log('💾 Nuevo pago guardado:', newOrder);
-            
-           await this.notificationService.sendPaymentNotification(
-               userObj.email, userObj.name)
 
         } else {
 
