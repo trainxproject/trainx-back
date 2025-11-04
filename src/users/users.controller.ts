@@ -26,7 +26,7 @@ export class UsersController {
         return this.usersService.findOne(id);
     }
 
-    @Get(':id')
+    @Get('trainer/:id')
     @ApiOperation({ summary: 'Retrieve the trainer assigned to a specific user' })
     @ApiParam({ name: 'id', description: 'Unique ID of the user to check trainer assignment', type: String })
     @ApiResponse({ status: 200, description: 'Returns the trainer assigned to the specified user.' })
