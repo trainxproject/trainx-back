@@ -32,10 +32,12 @@ export class UsersService {
     }
 
     async findUserTrainer(id: string) {
-        return this.usersRepository.findOne({
+        const user = await this.usersRepository.findOne({
             where: { id },
             relations: ['trainer'],
         });
+
+        return user?.trainer
     }
 
     async planUserService(userId: any) {
