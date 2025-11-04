@@ -3,7 +3,7 @@ import { ActivitiesService } from './activities.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import * as path from 'path';
 import { UpdateActivityDto } from './dtos/update-activity.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('Activities')
 @Controller('activities')
@@ -13,14 +13,16 @@ export class ActivitiesController {
         private readonly cloudinaryService: CloudinaryService
     ) {}
 
-
     @Get("filter")
+    @ApiOperation({ summary: 'Filter activities by name' })
+    @ApiQuery({ name: 'name', required: false, description: 'Activity name to filter by' })
+    @ApiResponse({ status: 200, description: 'Filtered list of activities returned successfully' })
+    @ApiResponse({ status: 404, description: 'No activities found matching the filter' })
     async filter(
         @Query("name") name: string
     ){
         return this.activitiesService.filterService(name);
     }
-
 
     @Get()
     @ApiOperation({ summary: 'Get all activities' })
@@ -40,7 +42,7 @@ export class ActivitiesController {
 
     @Post()
     @ApiOperation({ summary: 'Create a new activity' })
-    @ApiBody({ 
+    @ApiBody({
         description: 'Data to create activity',
         schema: {
             type: 'object',
@@ -107,12 +109,12 @@ export class ActivitiesController {
             }
         ];
 
-    for (const activity of activities) {
-        const exists = await this.activitiesService.findByName(activity.name);
-        if (!exists) {
-            await this.activitiesService.create(activity);
+        for (const activity of activities) {
+            const exists = await this.activitiesService.findByName(activity.name);
+            if (!exists) {
+                await this.activitiesService.create(activity);
+            }
         }
-    }
 
         return { message: 'Activities seeded successfully ✅' };
     }
@@ -128,7 +130,7 @@ export class ActivitiesController {
         if (!id) throw new BadRequestException('Valid ID must be provided');
         return this.activitiesService.updateActivity(id, body);
     }
-    
+
     @Delete(':id')
     @ApiOperation({ summary: 'Delete an activity' })
     @ApiParam({ name: 'id', description: 'Activity ID to delete' })

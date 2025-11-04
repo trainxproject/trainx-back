@@ -90,7 +90,6 @@ export class MpService {
         const payResponse = await myPayment.get({id: id})
         const pay = payResponse; 
 
-        // if (!pay?.id) throw new NotFoundException('Payment not found');
         console.log('📦 Pago verificado:', pay);
 
         const existingPayment = await this.paymentRepo.findOne({
@@ -122,10 +121,12 @@ export class MpService {
             })
             const newOrder = this.paymentRepo.create(newPayment)
 
+            await this.notificationService.sendPaymentNotification(
+            userObj.email, userObj.name)
+
             await this.paymentRepo.save(newOrder)
             console.log('💾 Nuevo pago guardado:', newOrder);
-           await this.notificationService.sendPaymentNotification(
-               userObj.email, userObj.name)
+
         } else {
 
             if (!existingPayment?.id) {

@@ -27,18 +27,22 @@ export class UsersController {
     }
 
     @Get(':id')
+    @ApiOperation({ summary: 'Retrieve the trainer assigned to a specific user' })
+    @ApiParam({ name: 'id', description: 'Unique ID of the user to check trainer assignment', type: String })
+    @ApiResponse({ status: 200, description: 'Returns the trainer assigned to the specified user.' })
     findUserTrainer(@Param('id') id: string) {
         return this.usersService.findUserTrainer(id);
     }
 
-
     @Get("plan/:id")
+    @ApiOperation({ summary: 'Retrieve the active plan of a specific user' })
+    @ApiParam({ name: 'id', description: 'Unique ID of the user', type: String })
+    @ApiResponse({ status: 200, description: 'Returns the plan information for the specified user.' })
     async planUser(
         @Param("id", new ParseUUIDPipe()) userId: string,
     ){
         return this.usersService.planUserService(userId);
     }
-
 
     @Post()
     @ApiOperation({ summary: 'Create a new user in the platform' })
@@ -66,8 +70,10 @@ export class UsersController {
     }
 
     @Patch(':id/trainer')
-    @ApiOperation({ summary: 'Asigna un entrenador al usuario (solo si pagó la suscripción)' })
-    @ApiResponse({ status: 200, description: 'Entrenador asignado correctamente' })
+    @ApiOperation({ summary: 'Assign a trainer to the user (only if they have an active subscription)' })
+    @ApiParam({ name: 'id', description: 'User ID to assign trainer to', type: String })
+    @ApiBody({ type: AssignTrainerDto })
+    @ApiResponse({ status: 200, description: 'Trainer assigned successfully.' })
     assignTrainer(
         @Param('id') id: string,
         @Body() body: AssignTrainerDto,
@@ -76,14 +82,11 @@ export class UsersController {
     }
     
     @Patch(':id/name')
-    @ApiOperation({ summary: 'Actualizar el nombre de un usuario específico' })
-    @ApiParam({ name: 'id', description: 'ID del usuario a actualizar', type: String })
+    @ApiOperation({ summary: 'Update the name of a specific user' })
+    @ApiParam({ name: 'id', description: 'Unique ID of the user to update', type: String })
     @ApiBody({ type: UpdateNameDto })
     @ApiResponse({ status: 200, description: 'Returns the user with the updated name.' })
     async updateName(@Param('id') id: string, @Body() body: UpdateNameDto) {
         return this.usersService.updateName(id, body.name);
     }
-
-   
-
 }
