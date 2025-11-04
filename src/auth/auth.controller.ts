@@ -58,7 +58,5 @@ export class AuthController {
     const jwt = await this.authService.validateGoogleUser(user);
     return res.redirect(`https://trainx-front.vercel.app?token=${jwt}`);
   }
-// 
   
-
 }
