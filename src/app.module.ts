@@ -16,6 +16,7 @@ import { TrainersModule } from './trainers/trainers.module';
 import { PlanModule } from './plans/plan.module';
 import { MercadoPagoModule } from './mercadopago/mercado.module';
 import { TrainerSeeder } from './trainers/trainer.seeder';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 
 @Module({
   imports: [
@@ -48,7 +49,8 @@ import { TrainerSeeder } from './trainers/trainer.seeder';
     ReservationsModule,
     TrainersModule,
     PlanModule,
-    MercadoPagoModule
+    MercadoPagoModule,
+    MaintenanceModule
   ],
 })
 export class AppModule implements OnApplicationBootstrap {
