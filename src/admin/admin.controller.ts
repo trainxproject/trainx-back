@@ -13,7 +13,7 @@ import {
 
 @ApiTags('Admin')
 @Controller('admin')
-@UseGuards(AuthGuard('jwt')) // Only authenticated admins can access these endpoints
+@UseGuards(AuthGuard('jwt'))
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 

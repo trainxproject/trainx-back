@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { PaymentsService } from 'src/payments/payments.service';
+import { SubStatus } from '../pay.enum';
 
 @Injectable()
 export class AdminService {
@@ -52,13 +53,14 @@ export class AdminService {
     return users.map(user => {
       // Obtener el último pago
       const lastPayment = user.payments && user.payments.length > 0
-        ? user.payments.sort((a, b) => 
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )[0]
+        ? user.payments[0] // Ya viene ordenado por createdAt DESC
         : null;
   
-      // Obtener suscripción activa
-      const subscription = user.subscription;
+      // Determinar si tiene un plan activo basado en el último pago
+      const hasActivePlan = lastPayment 
+        && lastPayment.paid 
+        && lastPayment.status === SubStatus.ACTIVE 
+        && new Date(lastPayment.endsAt) > new Date(); // Verifica que no haya expirado
   
       // Obtener reservas activas
       const activeReservations = user.reservations
@@ -69,35 +71,46 @@ export class AdminService {
         id: user.id,
         name: user.name,
         email: user.email,
-        // Estado del usuario (activo/inactivo)
-        status: user.status, // Este campo muestra si el usuario está "activo" o "inactivo"
+        status: user.status,
         profilePicture: user.profilePicture,
         
-        // Plan mensual (de la suscripción)
-        monthlyPlan: subscription ? {
-          type: subscription.type,
-          amount: subscription.amount,
-          isActive: subscription.isActive,
-          startDate: subscription.startDate,
-          endDate: subscription.endDate,
+        // Plan actual (del último pago si está activo)
+        currentPlan: hasActivePlan && lastPayment.plan ? {
+          id: lastPayment.plan.id,
+          name: lastPayment.plan.name,
+          type: lastPayment.plan.type,
+          price: lastPayment.plan.price,
+          currency: lastPayment.plan.currency,
+          features: lastPayment.plan.features,
+          status: lastPayment.plan.status,
+          isActive: hasActivePlan, // true/false si el plan está activo
+          startsAt: lastPayment.startsAt,
+          endsAt: lastPayment.endsAt,
+          billingCycle: lastPayment.billingCycle, // mensual/anual
         } : null,
   
-        // Último pago (ordenado por fecha más reciente)
+        // Último pago (información del pago)
         lastPayment: lastPayment ? {
           id: lastPayment.id,
           amount: lastPayment.amount,
-          paid: lastPayment.paid, // true/false si está pagado
+          paid: lastPayment.paid,
           paymentMethod: lastPayment.paymentMethod,
-          createdAt: lastPayment.createdAt, // Fecha del último pago
-          status: lastPayment.status, // Estado del pago (ACTIVE, CANCELLED)
+          createdAt: lastPayment.createdAt, // ✅ Última fecha de pago
+          status: lastPayment.status,
+          startsAt: lastPayment.startsAt,
+          endsAt: lastPayment.endsAt,
           planName: lastPayment.plan?.name,
         } : null,
   
-        // Entrenador asignado
+        // Entrenador asignado ✅
         trainer: user.trainer ? {
           id: user.trainer.id,
           name: user.trainer.name,
           specialization: user.trainer.specialization,
+          formation: user.trainer.formation,
+          imageUrl: user.trainer.imageUrl,
+          qualification: user.trainer.qualification,
+          available: user.trainer.available,
         } : null,
   
         // Clases reservadas (solo activas)
@@ -124,6 +137,7 @@ export class AdminService {
           totalReservations: user.reservations?.length || 0,
           activeReservations: activeReservations.length,
           hasPaid: user.hasPaid,
+          hasActivePlan: hasActivePlan, // ✅ Indica si tiene plan activo
         }
       };
     });
