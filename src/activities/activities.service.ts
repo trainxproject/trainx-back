@@ -19,7 +19,11 @@ export class ActivitiesService {
         .leftJoinAndSelect("act.schedules", "schedule")
 
         if(name){
-            query.where("LOWER(act.name) LIKE LOWER(:name)", {name: `${name}`})
+
+            const names = Array.isArray(name) ? name : [name];
+
+
+            query.where("LOWER(act.name) IN(:...name)", {name: names.map(e => e.toLowerCase())})
         }
 
         const activities = await query.getMany()
