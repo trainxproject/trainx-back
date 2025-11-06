@@ -1,1 +1,3 @@
-export class CreateMaintenanceDto {}
+export class CreateMaintenanceDto {
+    active: boolean;
+}

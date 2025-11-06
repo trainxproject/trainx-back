@@ -1,17 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
-import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class MaintenanceService {
-  private isActive = false;
+  private readonly MAINTENANCE_KEY = 'maintenance:status';
 
-  async getStatus() {
-    return this.isActive;
+  constructor(private readonly redis: RedisService) {}
+
+  async getStatus(): Promise<boolean> {
+    const value = await this.redis.get(this.MAINTENANCE_KEY);
+    return String(value).toLowerCase() === 'true';
   }
-
-  setStatus(active: boolean){
-    this.isActive = active;
-    return this.isActive;
+  
+  
+  async setStatus(active: boolean): Promise<boolean> {
+    await this.redis.set(this.MAINTENANCE_KEY, active.toString());
+    return active;
   }
 }

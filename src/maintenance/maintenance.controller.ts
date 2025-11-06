@@ -2,10 +2,9 @@ import { Controller, Get, Post, Body } from '@nestjs/common';
 import { MaintenanceService } from './maintenance.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { MaintenanceGateway } from './maintenance.gateway';
+import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 
-class MaintenanceDto {
-  active: boolean;
-}
+
 
 @ApiTags('Maintenance')
 @Controller('maintenance')
@@ -40,8 +39,8 @@ export class MaintenanceController {
       },
     },
   })
-  async toggle(@Body() body: MaintenanceDto) {
-    const status = this.maintenanceService.setStatus(body.active);
+  async toggle(@Body() body: CreateMaintenanceDto) {
+    const status = await this.maintenanceService.setStatus(body.active);
     this.gateway.sendMaintenanceStatus(status);
     
     if (status) {
@@ -72,14 +71,12 @@ export class MaintenanceController {
   })
   async getStatus() {
     const isActive = await this.maintenanceService.getStatus();
-    
+    console.log('GET /maintenance -> isActive:', isActive);
     if (isActive) {
-      return { 
-        active: isActive,
-        message: 'Sistema en mantenimiento' 
-      };
+      return { active: isActive, message: 'Sistema en mantenimiento' };
     } else {
       return { active: isActive };
     }
   }
+  
 }
