@@ -129,14 +129,23 @@ export class UsersService {
 
     async findAllComplete(): Promise<User[]> {
         return this.usersRepository.find({
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                profilePicture: true,
+                status: true,
+                isAdmin: true,
+                hasPaid: true,
+            },
             relations: [
-                'subscription',
                 'payments',
                 'payments.plan',
                 'trainer',
                 'reservations',
                 'reservations.schedule',
-                'reservations.schedule.activity'
+                'reservations.schedule.activity',
+                'reservations.schedule.trainer'
             ],
             order: {
                 name: 'ASC',

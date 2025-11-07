@@ -9,6 +9,7 @@ import { UsersModule } from '../users/users.module';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { NotificationsModule } from 'src/notifications/notifications.module';
+import { AdminGuard } from './guards/admin.guard';
 
 @Module({
   imports: [
@@ -24,8 +25,8 @@ import { NotificationsModule } from 'src/notifications/notifications.module';
     }),
     NotificationsModule
   ],
-  providers: [AuthService, JwtStrategy, GoogleStrategy, GoogleAuthGuard],
+  providers: [AuthService, JwtStrategy, GoogleStrategy, GoogleAuthGuard, AdminGuard],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, AdminGuard],
 })
 export class AuthModule {}

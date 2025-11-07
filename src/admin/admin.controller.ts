@@ -1,19 +1,21 @@
 import { Controller, Patch, Param, Body, UseGuards, Get, Query } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { 
   ApiTags, 
   ApiOperation, 
   ApiResponse, 
   ApiParam, 
   ApiBody, 
-  ApiQuery 
+  ApiQuery, 
+  ApiBearerAuth
 } from '@nestjs/swagger';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @ApiTags('Admin')
 @Controller('admin')
-@UseGuards(AuthGuard('jwt')) // Only authenticated admins can access these endpoints
+@UseGuards(AdminGuard)
+@ApiBearerAuth()
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
