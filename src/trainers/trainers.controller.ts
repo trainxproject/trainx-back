@@ -2,9 +2,7 @@ import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Req, UseGuards } fro
 import { TrainersService } from './trainers.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CreateTrainerDto } from './dto/create-trainer.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
-import { AdminGuard, JwtAuthGuard } from 'src/auth/guards/admin.guard';
+import { AdminGuard, JwtAuthGuard} from 'src/auth/guards/admin.guard';
 
 @ApiTags('Trainers')
 @Controller('trainers')
