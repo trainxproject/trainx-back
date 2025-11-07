@@ -4,6 +4,7 @@ import { Pay } from '../../payments/entities/payment.entity';
 import { Reservation } from '../../reservations/entities/reservation.entity';
 import { Trainer } from '../../trainers/entities/trainer.entity';
 import { TrainerQualification } from 'src/trainers/entities/qualification.entity';
+import { UserRole } from '../../auth/roles.enum';
 
 @Entity({
     name: "users"
@@ -30,6 +31,13 @@ export class User {
 
     @Column({default: false})
     isAdmin: boolean
+
+    @Column({
+        type: 'enum',
+        enum: UserRole,
+        default: UserRole.USER
+    })
+    role: UserRole;
 
     @OneToOne(() => Subscription, (subscription) => subscription.user)
     subscription: Subscription;
