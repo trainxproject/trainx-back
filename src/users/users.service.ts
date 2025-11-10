@@ -46,15 +46,15 @@ export class UsersService {
             where: {id: userId}
         })
 
-        if(!user) throw new NotFoundException("User not Found")
+        if(!user) throw new NotFoundException("Usuario no encontrado")
         
         const planSub = await this.subscriptionRepository.findOne({
             where: {user: {id: user.id}},
             relations: ["user", "plan"]
         })
         
-        if(!planSub) throw new NotFoundException("Plan not found")
-        if(planSub.paid === false) throw new ForbiddenException("Purchase a Plan to access all the benefits.")
+        if(!planSub) throw new NotFoundException("Plan no encontrado para este usuario")
+        if(planSub.paid === false) throw new ForbiddenException("Compra un plan para continuar")
 
         return planSub.plan
     }

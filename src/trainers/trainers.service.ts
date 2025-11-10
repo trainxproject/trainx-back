@@ -40,9 +40,9 @@ export class TrainersService {
   async createQuali(idTrainer: string, idUser: any, rating:number) {
 
     const user = await this.userRepository.findOne({where: {id: idUser}})
-    if(!user) throw new NotFoundException("User not found")
+    if(!user) throw new NotFoundException("Usuario no encontrado")
     const trainer = await this.trainersRepository.findOne({where: {id: idTrainer}})
-    if(!trainer) throw new NotFoundException("The Trainer not exist")
+    if(!trainer) throw new NotFoundException("Entrenador no encontrado")
 
     const existQuali = await this.qualiRepository.findOne({
       where: {trainer: {id: trainer.id}, user: {id: user.id}},
@@ -51,11 +51,11 @@ export class TrainersService {
 
 
     if(existQuali){
-      throw new ForbiddenException("You have already rated this trainer.");
+      throw new ForbiddenException("Ya has calificado a este entrenador");
     } else {
     
       if(rating < 1 || rating > 5){
-      throw new BadRequestException("The qualification is invalid")
+      throw new BadRequestException("La calificación debe estar entre 1 y 5");
     }
 
     const qualiCreate = this.qualiRepository.create({
@@ -77,7 +77,7 @@ export class TrainersService {
     await this.trainersRepository.save(trainer)
 
     return {
-    message: 'Trainer qualified successfully',
+    message: 'Entrenador calificado exitosamente',
     average: trainer.qualification,
     };
 

@@ -62,29 +62,29 @@ export class SchedulesController {
 
         const schedules = [
             // CrossFit
-            { dayOfWeek: 'Monday', startTime: '19:00', endTime: '20:00', trainer: 'Carlos López', activity: crossfit },
-            { dayOfWeek: 'Wednesday', startTime: '19:00', endTime: '20:00', trainer: 'Carlos López', activity: crossfit },
-            { dayOfWeek: 'Friday', startTime: '19:00', endTime: '20:00', trainer: 'Ana García', activity: crossfit },
+            { dayOfWeek: 'Lunes', startTime: '19:00', endTime: '20:00', trainer: 'Carlos López', activity: crossfit },
+            { dayOfWeek: 'Miercoles', startTime: '19:00', endTime: '20:00', trainer: 'Carlos López', activity: crossfit },
+            { dayOfWeek: 'Viernes', startTime: '19:00', endTime: '20:00', trainer: 'Ana García', activity: crossfit },
             
             // Pilates
-            { dayOfWeek: 'Tuesday', startTime: '18:00', endTime: '19:00', trainer: 'María Rodríguez', activity: pilates },
-            { dayOfWeek: 'Thursday', startTime: '18:00', endTime: '19:00', trainer: 'María Rodríguez', activity: pilates },
+            { dayOfWeek: 'Martes', startTime: '18:00', endTime: '19:00', trainer: 'María Rodríguez', activity: pilates },
+            { dayOfWeek: 'Jueves', startTime: '18:00', endTime: '19:00', trainer: 'María Rodríguez', activity: pilates },
             
             // Zumba
-            { dayOfWeek: 'Monday', startTime: '20:00', endTime: '21:00', trainer: 'Fiama Martínez', activity: zumba },
-            { dayOfWeek: 'Tuesday', startTime: '20:00', endTime: '21:00', trainer: 'Fiama Martínez', activity: zumba },
-            { dayOfWeek: 'Wednesday', startTime: '20:00', endTime: '21:00', trainer: 'Fiama Martínez', activity: zumba },
-            { dayOfWeek: 'Thursday', startTime: '20:00', endTime: '21:00', trainer: 'Fiama Martínez', activity: zumba },
+            { dayOfWeek: 'Lunes', startTime: '20:00', endTime: '21:00', trainer: 'Fiama Martínez', activity: zumba },
+            { dayOfWeek: 'Martes', startTime: '20:00', endTime: '21:00', trainer: 'Fiama Martínez', activity: zumba },
+            { dayOfWeek: 'Miercoles', startTime: '20:00', endTime: '21:00', trainer: 'Fiama Martínez', activity: zumba },
+            { dayOfWeek: 'Jueves', startTime: '20:00', endTime: '21:00', trainer: 'Fiama Martínez', activity: zumba },
             
             // Telas
-            { dayOfWeek: 'Tuesday', startTime: '17:00', endTime: '18:00', trainer: 'Antonella Miracle', activity: telas },
-            { dayOfWeek: 'Thursday', startTime: '17:00', endTime: '18:00', trainer: 'Antonella Miracle', activity: telas },
+            { dayOfWeek: 'Martes', startTime: '17:00', endTime: '18:00', trainer: 'Antonella Dagalaglio', activity: telas },
+            { dayOfWeek: 'Jueves', startTime: '17:00', endTime: '18:00', trainer: 'Antonella Dagalaglio', activity: telas },
         ];
 
         for (const schedule of schedules) {
             await this.schedulesService.create(schedule);
         }
 
-        return { message: 'Schedules seeded successfully ✅' };
+        return { message: 'Horarios cargados exitosamente ✅' };
     }
 }
