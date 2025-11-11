@@ -22,6 +22,27 @@ export class ReservationsController {
         return this.reservationsService.findUserReservations(userId);
     }
 
+    @Get('user/:id/weekly-status')
+    @ApiOperation({ summary: 'Get user weekly reservation status and limits' })
+    @ApiParam({ name: 'id', description: 'User ID', type: String })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'Returns the weekly reservation status including used days and remaining days',
+        schema: {
+            example: {
+                planType: 'week-3',
+                maxDaysPerWeek: 3,
+                usedDays: 2,
+                remainingDays: 1,
+                reservedDays: ['lunes', 'miércoles'],
+                canReserveNewDay: true
+            }
+        }
+    })
+    async getWeeklyStatus(@Param('id') userId: string) {
+        return this.reservationsService.getWeeklyReservationStatus(userId);
+    }
+
     @UseGuards(AdminGuard)
     @Post(":id")
     @ApiOperation({ summary: 'Create a new reservation' })
