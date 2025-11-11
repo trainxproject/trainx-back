@@ -46,15 +46,15 @@ export class UsersService {
             where: {id: userId}
         })
 
-        if(!user) throw new NotFoundException("User not Found")
+        if(!user) throw new NotFoundException("Usuario no encontrado")
         
         const planSub = await this.subscriptionRepository.findOne({
             where: {user: {id: user.id}},
             relations: ["user", "plan"]
         })
         
-        if(!planSub) throw new NotFoundException("Plan not found")
-        if(planSub.paid === false) throw new ForbiddenException("Purchase a Plan to access all the benefits.")
+        if(!planSub) throw new NotFoundException("Plan no encontrado para este usuario")
+        if(planSub.paid === false) throw new ForbiddenException("Compra un plan para continuar")
 
         return planSub.plan
     }
@@ -86,9 +86,6 @@ export class UsersService {
     }
 
     async assignTrainer(id:string, userId: string) {
-        
-
-
 
         const user = await this.usersRepository.findOne({
             where: { id: userId },
@@ -98,12 +95,21 @@ export class UsersService {
 
         const pay = await this.subscriptionRepository.findOne({
             where: { user: {id: user.id} },
+            relations: ["plan"],
         });
 
         if (!pay) {
             throw new BadRequestException('El usuario aún no ha pagado su suscripción');
         }
-    
+        
+        if (!pay.paid) {
+            throw new BadRequestException("La subscripción del usuario no está pagada");
+        }
+
+        if (pay.plan.type === "week-3") {
+            throw new ForbiddenException("Tu plan de 3 días a la semana no permite incluye un entrenador personal. Por favor, actualiza tu plan al de 5 días para acceder a esta funcionalidad.");
+        }
+
         const trainer = await this.trainersRepository.findOne({ where: { id: id } });
         if (!trainer) throw new NotFoundException('Entrenador no encontrado');
     
@@ -117,6 +123,39 @@ export class UsersService {
         return {
             message: `Entrenador ${trainer.name} asignado exitosamente al usuario ${user.name}`,
         };
+    }
+
+    async canHaveTrainer(userId: string): Promise<{ allowed: boolean; reason?: string; planType?: string }> {
+        const user = await this.usersRepository.findOne({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            return { allowed: false, reason: 'Usuario no encontrado' };
+        }
+
+        const pay = await this.subscriptionRepository.findOne({
+            where: { user: { id: user.id } },
+            relations: ['plan'],
+        });
+
+        if (!pay) {
+            return { allowed: false, reason: 'No tiene suscripción activa' };
+        }
+
+        if (!pay.paid) {
+            return { allowed: false, reason: 'Suscripción no pagada' };
+        }
+
+        if (pay.plan.type === 'week-3') {
+            return { 
+                allowed: false, 
+                reason: 'El plan de 3 días no incluye entrenador personal',
+                planType: pay.plan.type
+            };
+        }
+
+        return { allowed: true, planType: pay.plan.type };
     }
 
     async updateName(id: string, newName: string): Promise<User> {

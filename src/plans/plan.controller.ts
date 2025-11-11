@@ -3,7 +3,7 @@ import { PlanService } from "./plan.service";
 import { partialDto, planDto } from "./plan.dto";
 import { AuthGuard } from "@nestjs/passport";
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from "@nestjs/swagger";
-import { AdminGuard, JwtAuthGuard } from "src/auth/guards/admin.guard";
+import { AdminGuard } from "../auth/guards/admin.guard";
 
 @ApiTags('Plans')
 @Controller("plans")
@@ -18,7 +18,7 @@ export class PlanController{
         return await this.service.view()
     }
     
-    @UseGuards(JwtAuthGuard, AdminGuard)
+    @UseGuards(AdminGuard)
     @Post()
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Create a new plan' })
@@ -34,7 +34,7 @@ export class PlanController{
         return await this.service.create(plan, id)
     }
     
-    @UseGuards(JwtAuthGuard, AdminGuard)
+    @UseGuards(AdminGuard)
     @Put(":id")
     @ApiOperation({ summary: 'Update a plan' })
     @ApiParam({ name: 'id', description: 'Plan ID' })
@@ -51,7 +51,7 @@ export class PlanController{
         return await this.service.modify(plan, userId, planId)
     }
 
-    @UseGuards(JwtAuthGuard, AdminGuard)
+    @UseGuards(AdminGuard)
     @Delete(":id")
     @ApiOperation({ summary: 'Delete a plan' })
     @ApiParam({ name: 'id', description: 'Plan ID' })
@@ -66,7 +66,7 @@ export class PlanController{
         return {message: "Plan successfully deleted"} 
     }
 
-    @UseGuards(JwtAuthGuard, AdminGuard)
+    @UseGuards(AdminGuard)
     @Patch(":id")
     @ApiOperation({ summary: 'Update plan status' })
     @ApiParam({ name: 'id', description: 'Plan ID' })
@@ -76,7 +76,7 @@ export class PlanController{
         @Param("id", new ParseUUIDPipe) id: string,
         @Req() req: any
     ){
-         const userId = req.user.id
+        const userId = req.user.id
         return await this.service.status(id, userId)
     }
 }

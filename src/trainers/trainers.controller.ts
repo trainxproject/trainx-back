@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Req, UseGuards } fro
 import { TrainersService } from './trainers.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CreateTrainerDto } from './dto/create-trainer.dto';
-import { AdminGuard, JwtAuthGuard} from 'src/auth/guards/admin.guard';
+import { AdminGuard, JwtAuthGuard} from '../auth/guards/admin.guard';
 
 @ApiTags('Trainers')
 @Controller('trainers')
@@ -17,7 +17,7 @@ export class TrainersController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Create a new trainer' })
   @ApiBody({ description: 'Trainer data to create a new trainer', type: CreateTrainerDto })
   @ApiResponse({ status: 201, description: 'Trainer created successfully.' })
@@ -29,7 +29,7 @@ export class TrainersController {
   }
 
   @Post(":id")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard,JwtAuthGuard)
   @ApiOperation({ summary: 'Rate a trainer' })
   @ApiParam({ name: 'id', description: 'Trainer ID' })
   @ApiBody({
