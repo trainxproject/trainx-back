@@ -116,7 +116,7 @@ export class ActivitiesController {
             }
         }
 
-        return { message: 'Activities seeded successfully ✅' };
+        return { message: 'Actividades cargadas correctamente ✅' };
     }
 
     @Put(':id')
