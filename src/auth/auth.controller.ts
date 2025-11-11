@@ -6,7 +6,7 @@ import { GoogleAuthGuard } from './guards/google-auth.guard';
 import type { Response, Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { GoogleStrategy } from './strategies/google.strategy';
-import { JwtAuthGuard } from './guards/admin.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -29,7 +29,7 @@ export class AuthController {
     return this.authService.login(dto.email, dto.password);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
   @Post('logout')
   @ApiOperation({ summary: 'Logout the authenticated user' })
   @ApiResponse({ status: 200, description: 'User successfully logged out.' })

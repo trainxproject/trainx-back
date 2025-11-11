@@ -48,7 +48,7 @@ export class SubscriptionsService {
     if (today > new Date(subscription.endDate)) {
       subscription.isActive = false;
       await this.subscriptionsRepository.save(subscription);
-      return { message: 'Subscription expired', isActive: false, user: subscription.user };
+      return { message: 'Subscripción expirada', isActive: false, user: subscription.user };
     }
 
     // Verificar pago
@@ -58,7 +58,7 @@ export class SubscriptionsService {
 
     await this.subscriptionsRepository.save(subscription);
 
-    return { message: subscription.isActive ? 'Active subscription' : 'Inactive subscription', isActive: subscription.isActive, user: subscription.user };
+    return { message: subscription.isActive ? 'Subscripción activa' : 'Subscripción inactiva', isActive: subscription.isActive, user: subscription.user };
   }
 
   remove(id: string) {
