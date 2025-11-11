@@ -1,6 +1,6 @@
 export const TrainersSeed = [
       {
-        name: 'Antonella Miracle',
+        name: 'Antonella Dagalaglio',
         specialization: 'Entrenadora olímpica de powerlifting, especializada en técnica y planificación de fuerza, con integración de control mental y conciencia corporal a partir de su maestría en psicología deportiva y formación avanzada en telas aéreas.',
         imageUrl: 'https://res.cloudinary.com/dxpqhpme3/image/upload/v1761433928/antonella-miracle_bbhthd.jpg',
       },

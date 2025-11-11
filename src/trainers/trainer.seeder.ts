@@ -25,7 +25,7 @@ export class TrainerSeeder {
             }
 
         }
-        console.log("✅ All trainer seeded")
+        console.log("✅ Todos los entrenadores han sido cargados")
     }
 
 }
