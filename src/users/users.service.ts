@@ -23,8 +23,30 @@ export class UsersService {
 
     ) {}
 
-    async findAll(): Promise<User[]> {
-        return this.usersRepository.find({relations: ["subscription"]});
+    async findAll() {
+        const user = await this.usersRepository.find({
+                where: {},
+                relations: ["payments", "trainer", "subscription"]});
+            
+
+        return user.map((u) => (
+            {
+            id: u.id,
+            name: u?.name,
+            email: u?.email,
+            status: u?.status,
+            role: u?.role,
+            hasPaid: u?.hasPaid,
+            trainer: u?.trainer?.name,
+            subscription: u.subscription,
+            payment: u.payments.map((e)=>({
+                plan: e.billingCycle,
+                status: e.status
+            }))
+        }
+
+        ))
+
     }
 
     async findOne(id: string) {
