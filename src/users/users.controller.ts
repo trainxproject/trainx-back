@@ -4,7 +4,7 @@ import { User } from './entities/user.entity';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { AssignTrainerDto } from './dtos/assign-trainer.dto';
 import { UpdateNameDto } from './dtos/update-name.dto';
-import { JwtAuthGuard } from 'src/auth/guards/admin.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -26,7 +26,7 @@ export class UsersController {
         return this.usersService.findOne(id);
     }
 
-    @Get(':id')
+    @Get('trainer/:id')
     @ApiOperation({ summary: 'Retrieve the trainer assigned to a specific user' })
     @ApiParam({ name: 'id', description: 'Unique ID of the user to check trainer assignment', type: String })
     @ApiResponse({ status: 200, description: 'Returns the trainer assigned to the specified user.' })
@@ -42,6 +42,24 @@ export class UsersController {
         @Param("id", new ParseUUIDPipe()) userId: string,
     ){
         return this.usersService.planUserService(userId);
+    }
+
+    @Get(':id/can-have-trainer')
+    @ApiOperation({ summary: 'Check if a user can have a personal trainer based on their plan' })
+    @ApiParam({ name: 'id', description: 'Unique ID of the user', type: String })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'Returns whether the user can have a trainer and the reason if not allowed.',
+        schema: {
+            example: {
+                allowed: false,
+                reason: 'El plan de 3 días no incluye entrenador personal',
+                planType: 'week-3'
+            }
+        }
+    })
+    async canHaveTrainer(@Param('id') id: string) {
+        return this.usersService.canHaveTrainer(id);
     }
 
     @Post()
@@ -70,15 +88,17 @@ export class UsersController {
     }
 
     @Patch(':id/trainer')
+    @UseGuards(AdminGuard)
     @ApiOperation({ summary: 'Assign a trainer to the user (only if they have an active subscription)' })
     @ApiParam({ name: 'id', description: 'User ID to assign trainer to', type: String })
     @ApiBody({ type: AssignTrainerDto })
     @ApiResponse({ status: 200, description: 'Trainer assigned successfully.' })
     assignTrainer(
         @Param('id') id: string,
-        @Body() body: AssignTrainerDto,
+        @Req() req: any
     ) {
-        return this.usersService.assignTrainer(id, body.trainerId);
+        const userId = req.user.id
+        return this.usersService.assignTrainer(id, userId);
     }
     
     @Patch(':id/name')

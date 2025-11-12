@@ -1,6 +1,6 @@
 export const Plans = [
     { 
-        name: "3-Day Weekly Plan",
+        name: "Plan Semanal de 3 días",
         price: 1500,
         type: "week-3",
         currency: "ARS",  
@@ -13,7 +13,7 @@ export const Plans = [
         ],
     },
     {
-        name: "5-Day Weekly Plan",
+        name: "Plan Semanal de 5 días",
         price: 2500,
         type: "week-5",
         currency: "ARS",  

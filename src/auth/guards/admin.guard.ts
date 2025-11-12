@@ -1,40 +1,32 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
-import { Observable } from "rxjs";
-
-
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
+import { UserRole } from '../roles.enum';
+import { ROLES_KEY } from '../decorators/roles.decorator';
 
 @Injectable()
-
-
 
 export class JwtAuthGuard extends AuthGuard("jwt"){}
 
 
-export class AdminGuard implements CanActivate {
+export class AdminGuard  implements CanActivate {
+
+    async canActivate(context: ExecutionContext): Promise<boolean> {
     
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    
-            const request = context.switchToHttp().getRequest()
 
+        const request = context.switchToHttp().getRequest();
+        const user = request.user;
 
-            const user = request.user
-           
+        if (!user) {
+        throw new ForbiddenException('User not found');
+        }
 
-            if (!user) {
-            throw new ForbiddenException('No user information found in request. Make sure JwtAuthGuard runs first.');
-            }
+        const isAdmin = user.role === UserRole.ADMIN || user.isAdmin === true;
+        
+        if (!isAdmin) {
+        throw new ForbiddenException('Access denied. Admin privileges required.');
+        }
 
-            if (!user.isAdmin) {
-            throw new ForbiddenException("Sorry, you don't have admin permissions.");
-            }
-
-            return true
-
+        return true;
     }
-
-
 }
-
-
-

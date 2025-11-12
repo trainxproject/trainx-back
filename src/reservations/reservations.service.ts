@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { Reservation } from './entities/reservation.entity';
 import { Schedule } from '../schedules/entities/schedule.entity';
 import { Subscription } from '../suscriptions/entities/subscription.entity';
@@ -37,7 +37,82 @@ export class ReservationsService {
     async findUserReservations(userId: string) {
         return this.reservationRepository.find({
             where: { user: { id: userId } },
+            relations: ['user', 'schedule'],
         })
+    }
+
+    private getWeekBounds(): { startOfWeek: Date; endOfWeek: Date } {
+        const now = new Date();
+        const dayOfWeek = now.getDay(); // 0 = Domingo, 1 = Lunes, etc.
+        
+        // Calcular el lunes de esta semana (inicio)
+        const startOfWeek = new Date(now);
+        const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Si es domingo, retroceder 6 días
+        startOfWeek.setDate(now.getDate() + diff);
+        startOfWeek.setHours(0, 0, 0, 0);
+        
+        // Calcular el domingo de esta semana (fin)
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+        
+        return { startOfWeek, endOfWeek };
+    }
+
+    //  Método para validar la restricción de días según el plan
+    private async validateWeeklyDayLimit(userId: string, newScheduleDayOfWeek: string): Promise<void> {
+        // Obtener el plan del usuario
+        const userPlan = await this.subscriptionRepository.findOne({
+            where: { user: { id: userId }, paid: true },
+            relations: ['plan'],
+        });
+
+        if (!userPlan || !userPlan.plan) {
+            throw new BadRequestException('No se pudo verificar el plan del usuario');
+        }
+
+        // Solo aplicar restricción para plan week-3
+        if (userPlan.plan.type !== 'week-3') {
+            return; // Plan week-5 o cualquier otro no tiene restricción
+        }
+
+        // Obtener límites de la semana actual
+        const { startOfWeek, endOfWeek } = this.getWeekBounds();
+
+        // Obtener todas las reservas ACTIVAS del usuario en esta semana
+        const weeklyReservations = await this.reservationRepository.find({
+            where: {
+                user: { id: userId },
+                status: 'active',
+                createdAt: Between(startOfWeek, endOfWeek),
+            },
+            relations: ['schedule'],
+        });
+
+        // Extraer los días DISTINTOS que ya ha reservado
+        const reservedDays = new Set<string>();
+        weeklyReservations.forEach(reservation => {
+            if (reservation.schedule && reservation.schedule.dayOfWeek) {
+                reservedDays.add(reservation.schedule.dayOfWeek.toLowerCase());
+            }
+        });
+
+        // Si el nuevo día ya está en sus reservas, permitir (puede reservar múltiples clases el mismo día)
+        if (reservedDays.has(newScheduleDayOfWeek.toLowerCase())) {
+            return; // Mismo día, permitido
+        }
+
+        // Si ya tiene 3 días distintos reservados, rechazar
+        if (reservedDays.size >= 3) {
+            const daysNames = Array.from(reservedDays).join(', ');
+            throw new ForbiddenException(
+                `Tu plan de 3 días a la semana solo permite reservar en 3 días distintos. ` +
+                `Ya tienes reservas en: ${daysNames}. ` +
+                `Puedes agregar más clases en estos días o esperar a la próxima semana.`
+            );
+        }
+
+        // Tiene menos de 3 días, puede reservar
     }
 
     async createReservation(userId: string, scheduleId: string) {
@@ -59,6 +134,8 @@ export class ReservationsService {
         where: { user: { id: user?.id }, paid: true },
         });
         if (!activeSub) throw new BadRequestException('You do not have an active subscription');
+
+        await this.validateWeeklyDayLimit(userId, schedule.dayOfWeek);
 
         const currentReservations = schedule.reservations.length;
         if (
@@ -110,11 +187,11 @@ export class ReservationsService {
 
     async deleteReservation(id: string, userId: any) {
 
-         const user = await this.userRepository.findOne({
+        const user = await this.userRepository.findOne({
             where: {id: userId}
         })
 
-         const reservation = await this.reservationRepository.findOne({
+        const reservation = await this.reservationRepository.findOne({
             where: { id: id, user: {id: user?.id}},
             relations: ['user'],
         });
@@ -125,4 +202,56 @@ export class ReservationsService {
 
         return await this.reservationRepository.remove(reservation)    
     }
+
+    async getWeeklyReservationStatus(userId: string): Promise<{
+        planType: string;
+        maxDaysPerWeek: number;
+        usedDays: number;
+        remainingDays: number;
+        reservedDays: string[];
+        canReserveNewDay: boolean;
+    }> {
+        // Obtener el plan del usuario
+        const userPlan = await this.subscriptionRepository.findOne({
+            where: { user: { id: userId }, paid: true },
+            relations: ['plan'],
+        });
+
+        if (!userPlan || !userPlan.plan) {
+            throw new BadRequestException('No se encontró un plan activo');
+        }
+
+        const maxDays = userPlan.plan.type === 'week-3' ? 3 : 5;
+
+        // Obtener límites de la semana actual
+        const { startOfWeek, endOfWeek } = this.getWeekBounds();
+
+        // Obtener reservas activas de esta semana
+        const weeklyReservations = await this.reservationRepository.find({
+            where: {
+                user: { id: userId },
+                status: 'active',
+                createdAt: Between(startOfWeek, endOfWeek),
+            },
+            relations: ['schedule'],
+        });
+
+        // Contar días distintos
+        const reservedDays = new Set<string>();
+        weeklyReservations.forEach(reservation => {
+            if (reservation.schedule && reservation.schedule.dayOfWeek) {
+                reservedDays.add(reservation.schedule.dayOfWeek);
+            }
+        });
+
+        return {
+            planType: userPlan.plan.type,
+            maxDaysPerWeek: maxDays,
+            usedDays: reservedDays.size,
+            remainingDays: maxDays - reservedDays.size,
+            reservedDays: Array.from(reservedDays),
+            canReserveNewDay: reservedDays.size < maxDays,
+        };
+    }
+
 }

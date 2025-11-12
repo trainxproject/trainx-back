@@ -28,7 +28,7 @@ export class PlanService {
 
     async create(dto: planDto, id: string){
         const admin = await this.userRepo.findOne({where: {id: id}})
-        if(admin?.isAdmin === false) throw new BadRequestException("Sorry, you don't have the necessary permissions.")
+        if(admin?.isAdmin === false) throw new BadRequestException("Usted no tiene los permisos necesarios.")
 
         const createPlan = this.planRepo.create({
                 ...dto,
@@ -40,10 +40,10 @@ export class PlanService {
     }
     async modify(plan: partialDto, userId: string, planId: string){
         const admin = await this.userRepo.findOne({where: {id: userId}})
-        if(admin?.isAdmin === false) throw new BadRequestException("Sorry, you don't have the necessary permissions.")
+        if(admin?.isAdmin === false) throw new BadRequestException("Usted no tiene los permisos necesarios.")
 
         const searchPlan = await this.planRepo.findOne({where: {id: planId}})
-        if(!searchPlan) throw new NotFoundException("Plan not found.")
+        if(!searchPlan) throw new NotFoundException("Plan no encontrado.")
 
         const modify = await this.planRepo.merge(searchPlan, plan)
 
@@ -53,20 +53,20 @@ export class PlanService {
 
     async delete(userId: any, id: string){
         const admin = await this.userRepo.findOne({where: {id: userId}})
-        if(admin?.isAdmin === false) throw new BadRequestException("Sorry, you don't have the necessary permissions.")
+        if(admin?.isAdmin === false) throw new BadRequestException("Usted no tiene los permisos necesarios.")
 
         const searchPlan = await this.planRepo.findOne({where: {id: id}})
-        if(!searchPlan) throw new NotFoundException("Plan not found.")
-         
+        if(!searchPlan) throw new NotFoundException("Plan no encontrado.")
+        
         return await this.planRepo.delete(id); 
     }
 
     async status(id: string, userId:string){
         const admin = await this.userRepo.findOne({where: {id: userId}})
-        if(admin?.isAdmin === false) throw new BadRequestException("Sorry, you don't have the necessary permissions.")
+        if(admin?.isAdmin === false) throw new BadRequestException("Usted no tiene los permisos necesarios.")
 
         const searchPlan = await this.planRepo.findOne({where: {id: id}})
-        if(!searchPlan) throw new NotFoundException("Plan not found.")
+        if(!searchPlan) throw new NotFoundException("Plan no encontrado.")
 
         const newStatus = searchPlan.status === PlansStatus.ACTIVE ? PlansStatus.SUSPENDED : PlansStatus.ACTIVE
 

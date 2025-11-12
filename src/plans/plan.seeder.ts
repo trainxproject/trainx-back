@@ -28,7 +28,7 @@ export class PlanSeeder {
                 }));
             }
         }
-        console.log("✅ All plans seeded");
+        console.log("✅ Los planes han sido cargados correctamente.");
     }
 }
 

@@ -23,8 +23,30 @@ export class UsersService {
 
     ) {}
 
-    async findAll(): Promise<User[]> {
-        return this.usersRepository.find({relations: ["subscription"]});
+    async findAll() {
+        const user = await this.usersRepository.find({
+                where: {},
+                relations: ["payments", "trainer", "subscription"]});
+            
+
+        return user.map((u) => (
+            {
+            id: u.id,
+            name: u?.name,
+            email: u?.email,
+            status: u?.status,
+            role: u?.role,
+            hasPaid: u?.hasPaid,
+            trainer: u?.trainer?.name,
+            subscription: u.subscription,
+            payment: u.payments.map((e)=>({
+                plan: e.billingCycle,
+                status: e.status
+            }))
+        }
+
+        ))
+
     }
 
     async findOne(id: string) {
@@ -32,10 +54,12 @@ export class UsersService {
     }
 
     async findUserTrainer(id: string) {
-        return this.usersRepository.findOne({
+        const user = await this.usersRepository.findOne({
             where: { id },
             relations: ['trainer'],
         });
+
+        return user?.trainer
     }
 
     async planUserService(userId: any) {
@@ -44,15 +68,15 @@ export class UsersService {
             where: {id: userId}
         })
 
-        if(!user) throw new NotFoundException("User not Found")
+        if(!user) throw new NotFoundException("Usuario no encontrado")
         
         const planSub = await this.subscriptionRepository.findOne({
             where: {user: {id: user.id}},
             relations: ["user", "plan"]
         })
         
-        if(!planSub) throw new NotFoundException("Plan not found")
-        if(planSub.paid === false) throw new ForbiddenException("Purchase a Plan to access all the benefits.")
+        if(!planSub) throw new NotFoundException("Plan no encontrado para este usuario")
+        if(planSub.paid === false) throw new ForbiddenException("Compra un plan para continuar")
 
         return planSub.plan
     }
@@ -83,18 +107,32 @@ export class UsersService {
         return this.usersRepository.save(user);
     }
 
-    async assignTrainer(userId: string, trainerId: string) {
+    async assignTrainer(id:string, userId: string) {
+
         const user = await this.usersRepository.findOne({
             where: { id: userId },
-            relations: ['trainer'],
+            relations: ['trainer', 'payments'],
         });
         if (!user) throw new NotFoundException('Usuario no encontrado');
-    
-        if (!user.hasPaid) {
+
+        const pay = await this.subscriptionRepository.findOne({
+            where: { user: {id: user.id} },
+            relations: ["plan"],
+        });
+
+        if (!pay) {
             throw new BadRequestException('El usuario aún no ha pagado su suscripción');
         }
-    
-        const trainer = await this.trainersRepository.findOne({ where: { id: trainerId } });
+        
+        if (!pay.paid) {
+            throw new BadRequestException("La subscripción del usuario no está pagada");
+        }
+
+        if (pay.plan.type === "week-3") {
+            throw new ForbiddenException("Tu plan de 3 días a la semana no permite incluye un entrenador personal. Por favor, actualiza tu plan al de 5 días para acceder a esta funcionalidad.");
+        }
+
+        const trainer = await this.trainersRepository.findOne({ where: { id: id } });
         if (!trainer) throw new NotFoundException('Entrenador no encontrado');
     
         if (!trainer.available) {
@@ -109,6 +147,39 @@ export class UsersService {
         };
     }
 
+    async canHaveTrainer(userId: string): Promise<{ allowed: boolean; reason?: string; planType?: string }> {
+        const user = await this.usersRepository.findOne({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            return { allowed: false, reason: 'Usuario no encontrado' };
+        }
+
+        const pay = await this.subscriptionRepository.findOne({
+            where: { user: { id: user.id } },
+            relations: ['plan'],
+        });
+
+        if (!pay) {
+            return { allowed: false, reason: 'No tiene suscripción activa' };
+        }
+
+        if (!pay.paid) {
+            return { allowed: false, reason: 'Suscripción no pagada' };
+        }
+
+        if (pay.plan.type === 'week-3') {
+            return { 
+                allowed: false, 
+                reason: 'El plan de 3 días no incluye entrenador personal',
+                planType: pay.plan.type
+            };
+        }
+
+        return { allowed: true, planType: pay.plan.type };
+    }
+
     async updateName(id: string, newName: string): Promise<User> {
         const user = await this.usersRepository.findOne({ where: { id } });
         if (!user) throw new NotFoundException('Usuario no encontrado');
@@ -119,14 +190,23 @@ export class UsersService {
 
     async findAllComplete(): Promise<User[]> {
         return this.usersRepository.find({
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                profilePicture: true,
+                status: true,
+                isAdmin: true,
+                hasPaid: true,
+            },
             relations: [
-                'subscription',
                 'payments',
                 'payments.plan',
                 'trainer',
                 'reservations',
                 'reservations.schedule',
-                'reservations.schedule.activity'
+                'reservations.schedule.activity',
+                'reservations.schedule.trainer'
             ],
             order: {
                 name: 'ASC',

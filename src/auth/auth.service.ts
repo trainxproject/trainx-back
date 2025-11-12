@@ -1,8 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-// import * as bcrypt from 'bcrypt';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
 
@@ -17,19 +16,21 @@ export class AuthService {
   // Registro: hashea password y crea usuario
   async register(dto: CreateUserDto) {
 
+    
+    const existing = await this.usersService.findByEmail(dto.email);
+    if (existing) throw new BadRequestException('Email ya registrado');
+
     if (dto.password !== dto.confirmPassword) {
       throw new BadRequestException('Password y Confirm Password no coinciden');
     }
-    const existing = await this.usersService.findByEmail(dto.email);
-    if (existing) throw new BadRequestException('Email ya registrado');
 
     const hashed = await bcrypt.hash(dto.password, 10);
     const user = await this.usersService.create({
       name: dto.name,
       email: dto.email,
-      password: hashed,
+      password: hashed
     });
-    // opcional: no devolver password
+
     delete (user as any).password;
 
     await this.notificationService.sendWelcome({
@@ -37,6 +38,8 @@ export class AuthService {
       name: user.name
     })
     return user;
+
+  
   }
 
   // Validación interna (para login)
@@ -86,6 +89,11 @@ export class AuthService {
         profilePicture: profile.picture
       });
     }
+
+    await this.notificationService.sendWelcome({
+      email: user.email,
+      name: user.name
+    })
   
     const payload = { sub: user.id, email: user.email, name: user.name, profilePicture: user.profilePicture };
     return this.jwtService.sign(payload);
