@@ -43,6 +43,28 @@ export class ReservationsController {
         return this.reservationsService.getWeeklyReservationStatus(userId);
     }
 
+    @Get('can-reserve/:userId/:scheduleId')
+    @ApiOperation({ summary: 'Check if user can reserve a specific schedule' })
+    @ApiParam({ name: 'userId', description: 'User ID', type: String })
+    @ApiParam({ name: 'scheduleId', description: 'Schedule ID', type: String })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'Returns whether the user can reserve that specific day',
+        schema: {
+            example: {
+                canReserve: true,
+                reason: 'Ya tienes 3 días reservados: lunes, miércoles, viernes',
+                reservedDays: ['lunes', 'miércoles', 'viernes']
+            }
+        }
+    })
+    async canReserveOnDay(
+        @Param('userId') userId: string,
+        @Param('scheduleId') scheduleId: string
+    ) {
+        return this.reservationsService.canReserveOnDay(userId, scheduleId);
+    }
+
     @UseGuards(AdminGuard)
     @Post(":id")
     @ApiOperation({ summary: 'Create a new reservation' })
