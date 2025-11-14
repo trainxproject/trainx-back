@@ -159,17 +159,18 @@ export class AdminService {
     };
   }
   
-  async getPlansCountByType(planType: '3_days' | '5_days') {
+  async getPlansCountByType(planType: 'week-3' | 'week-5') {
     const allUsers = await this.usersService.findAll();
     
-    const count = allUsers.filter(user => 
-      user.subscription?.type === planType
-    ).length;
+    const count = allUsers.reduce((acc, allUsers) => {
+      const plan = allUsers.payment.filter(e=> e.plan === planType).length || 0;
+      return acc + plan;
+    }, 0)
   
     return {
       planType,
       count,
-      description: planType === '3_days' ? '3 días a la semana' : '5 días a la semana'
+      description: planType === 'week-3' ? '3 días a la semana' : '5 días a la semana'
     };
   }
 
