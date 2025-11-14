@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { PaymentsService } from 'src/payments/payments.service';
 import { SubStatus } from '../pay.enum';
@@ -161,6 +161,8 @@ export class AdminService {
   
    async getPlansCountByType(planType: 'week-3' | 'week-5') {
     const allUsers = await this.usersService.findAll();
+
+    if(!allUsers) throw new ForbiddenException("Usuario")
     
     const count = allUsers.reduce((acc, allUsers) => {
       const plan = allUsers.payment.filter(e=> e.plan === planType).length || 0;
