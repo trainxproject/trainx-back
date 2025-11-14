@@ -89,8 +89,6 @@ export class AuthService {
         profilePicture: profile.picture
       });
     }
-  
-    const payload = { sub: user.id, email: user.email, name: user.name, profilePicture: user.profilePicture };
     
     await this.notificationService.sendWelcome({
       email: user.email,
