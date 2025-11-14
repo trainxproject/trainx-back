@@ -8,11 +8,13 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe())
 
   app.enableCors({
-    origin: 'http://localhost:3001', 
+    origin: [
+      'http://localhost:3001',
+      'https://trainx-front.vercel.app'
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true, 
-  });
-
+  })
   
   const config = new DocumentBuilder()
     .setTitle('TRAIN-X')

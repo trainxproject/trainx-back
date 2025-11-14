@@ -160,6 +160,7 @@ export class AdminService {
   }
   
    async getPlansCountByType(planType: 'week-3' | 'week-5') {
+
     const allUsers = await this.usersService.findAll();
 
     if(!allUsers) throw new ForbiddenException("Usuario")

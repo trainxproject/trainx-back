@@ -26,7 +26,9 @@ import { MaintenanceModule } from './maintenance/maintenance.module';
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => {
+       
+      return {
         type: "postgres",
         database: configService.get("DB_NAME"),
         host: configService.get("DB_HOST"),
@@ -34,8 +36,11 @@ import { MaintenanceModule } from './maintenance/maintenance.module';
         username: configService.get("DB_USERNAME"),
         password: configService.get("DB_PASSWORD") as string,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true
-      })
+        synchronize: true,
+        logging: true
+      }
+      }
+       
     }),
     UsersModule,
     SubscriptionsModule,
@@ -53,6 +58,8 @@ import { MaintenanceModule } from './maintenance/maintenance.module';
     MaintenanceModule
   ],
 })
+
+
 export class AppModule implements OnApplicationBootstrap {
 
   constructor(
