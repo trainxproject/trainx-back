@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { SchedulesService } from './schedules.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { ActivitiesService } from '../activities/activities.service';
@@ -86,5 +86,13 @@ export class SchedulesController {
         }
 
         return { message: 'Horarios cargados exitosamente ✅' };
+    }
+
+
+    @Delete(":id")
+    async deleteSchedule(
+        @Param("id", new ParseUUIDPipe()) scheduleId: string
+    ){
+        return await this.schedulesService.deleteElement(scheduleId)
     }
 }
