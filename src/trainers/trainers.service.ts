@@ -8,6 +8,7 @@ import { TrainerQualification } from './entities/qualification.entity';
 
 @Injectable()
 export class TrainersService {
+  
  
   constructor(
     @InjectRepository(Trainer)
@@ -82,7 +83,13 @@ export class TrainersService {
     };
 
     }
+  }
 
+  async deleteServiceTrainer(id: string) {
+    const trainer = await this.trainersRepository.findOne({where: {id: id}})
+    if(!trainer) throw new NotFoundException("Entrenador no encontrado")
+
+    return await this.trainersRepository.remove(trainer)
   }
 
 }
