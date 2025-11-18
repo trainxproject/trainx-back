@@ -125,10 +125,18 @@ export class ReservationsService {
         where: { id: scheduleId },
         relations: ['activity', 'reservations'],
         });
+        
+        const reservationVerify = await this.reservationRepository.findOne({
+        where: { user: {id: user?.id} , schedule: {id: schedule?.id}},
+        });
+
+       
         if (!schedule) throw new BadRequestException('Schedule not found');
 
         if (!schedule.activity.requiresReservation)
         throw new BadRequestException('This activity does not require a reservation');
+
+        if(reservationVerify) throw new ForbiddenException("Ya has reservado esta clase")
 
         const activeSub = await this.subscriptionRepository.findOne({
         where: { user: { id: user?.id }, paid: true },
@@ -136,8 +144,8 @@ export class ReservationsService {
         if (!activeSub) throw new BadRequestException('You do not have an active subscription');
 
         await this.validateWeeklyDayLimit(userId, schedule.dayOfWeek);
-
-        const currentReservations = schedule.reservations.length;
+        
+        const currentReservations = schedule.limit;
         if (
         schedule.activity.maxCapacity &&
         currentReservations >= schedule.activity.maxCapacity
@@ -150,6 +158,9 @@ export class ReservationsService {
         schedule,
         status: 'active',
         });
+
+        
+        await this.scheduleRepository.increment({id: reservation.schedule.id} , "limit", 1)
 
         return this.reservationRepository.save(reservation);
     }
@@ -180,6 +191,7 @@ export class ReservationsService {
 
         reservation.status = 'cancelled';
         await this.reservationRepository.save(reservation);
+        await this.scheduleRepository.decrement({id: reservation.schedule.id} , "limit", 1)
 
         return { message: 'Reservation successfully cancelled', reservation };
     }
@@ -198,7 +210,7 @@ export class ReservationsService {
 
         if(!reservation) throw new NotFoundException("Reservation not exist")
 
-        if(reservation?.status === "active") throw new ForbiddenException("You cannot delete a reservation that you have not canceled")
+        if(reservation?.status === "active") throw new ForbiddenException("You cannot delete a reservation that you have not cancelled")
 
         return await this.reservationRepository.remove(reservation)    
     }
@@ -253,5 +265,79 @@ export class ReservationsService {
             canReserveNewDay: reservedDays.size < maxDays,
         };
     }
+    
+    async canReserveOnDay(userId: string, scheduleId: string): Promise<{
+        canReserve: boolean;
+        reason?: string;
+        reservedDays?: string[];
+    }> {
+        try {
+            // Obtener el schedule para saber qué día es
+            const schedule = await this.scheduleRepository.findOne({
+                where: { id: scheduleId }
+            });
 
+            if (!schedule) {
+                return { canReserve: false, reason: 'Horario no encontrado' };
+            }
+
+            // Obtener el plan del usuario
+            const userPlan = await this.subscriptionRepository.findOne({
+                where: { user: { id: userId }, paid: true },
+                relations: ['plan'],
+            });
+
+            if (!userPlan || !userPlan.plan) {
+                return { canReserve: false, reason: 'No tienes un plan activo' };
+            }
+
+            // Si no es plan week-3, puede reservar sin restricción
+            if (userPlan.plan.type !== 'week-3') {
+                return { canReserve: true };
+            }
+
+            // Obtener límites de la semana actual
+            const { startOfWeek, endOfWeek } = this.getWeekBounds();
+
+            // Obtener reservas activas de esta semana
+            const weeklyReservations = await this.reservationRepository.find({
+                where: {
+                    user: { id: userId },
+                    status: 'active',
+                    createdAt: Between(startOfWeek, endOfWeek),
+                },
+                relations: ['schedule'],
+            });
+
+            // Extraer los días distintos ya reservados
+            const reservedDays = new Set<string>();
+            weeklyReservations.forEach(reservation => {
+                if (reservation.schedule && reservation.schedule.dayOfWeek) {
+                    reservedDays.add(reservation.schedule.dayOfWeek.toLowerCase());
+                }
+            });
+
+            const targetDay = schedule.dayOfWeek.toLowerCase();
+
+            // Si el día ya está reservado, puede agregar más clases ese día
+            if (reservedDays.has(targetDay)) {
+                return { canReserve: true };
+            }
+
+            // Si tiene menos de 3 días, puede reservar
+            if (reservedDays.size < 3) {
+                return { canReserve: true };
+            }
+
+            // Ya tiene 3 días y este es uno nuevo
+            return {
+                canReserve: false,
+                reason: `Ya tienes 3 días reservados: ${Array.from(reservedDays).join(', ')}. Solo puedes reservar en esos días.`,
+                reservedDays: Array.from(reservedDays)
+            };
+
+        } catch (error) {
+            return { canReserve: false, reason: 'Error al verificar disponibilidad' };
+        }
+    }
 }
