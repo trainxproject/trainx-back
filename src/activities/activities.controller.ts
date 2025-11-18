@@ -98,14 +98,14 @@ export class ActivitiesController {
                 description: 'La danza aérea es una nueva forma de expresión en donde el cuerpo en suspensión se expresa. Se centra en la fuerza, la flexibilidad, la coordinación y el control corporal.',
                 requiresReservation: true,
                 maxCapacity: 10,
-                imageUrl: 'https://res.cloudinary.com/dxpqhpme3/image/upload/v1762788445/gym_oscgja.png',
+                imageUrl: 'https://res.cloudinary.com/dxpqhpme3/image/upload/v1762788445/telas_kkowkt.png',
             },
             {
                 name: 'Gym',
                 description: 'Acceso gratuito al gimnasio para entrenar en cualquier momento dentro del horario autorizado.',
                 requiresReservation: false,
                 maxCapacity: null,
-                imageUrl: 'https://res.cloudinary.com/dxpqhpme3/image/upload/v1760749983/gym_qr4n4h.jpg',
+                imageUrl: 'https://res.cloudinary.com/dxpqhpme3/image/upload/v1762788445/gym_oscgja.png',
             }
         ];
 

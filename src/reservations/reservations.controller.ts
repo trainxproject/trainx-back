@@ -43,6 +43,30 @@ export class ReservationsController {
         return this.reservationsService.getWeeklyReservationStatus(userId);
     }
 
+
+    @UseGuards(JwtAuthGuard)
+    @Get('can-reserve/:userId/:scheduleId')
+    @ApiOperation({ summary: 'Check if user can reserve a specific schedule' })
+    @ApiParam({ name: 'userId', description: 'User ID', type: String })
+    @ApiParam({ name: 'scheduleId', description: 'Schedule ID', type: String })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'Returns whether the user can reserve that specific day',
+        schema: {
+            example: {
+                canReserve: true,
+                reason: 'Ya tienes 3 días reservados: lunes, miércoles, viernes',
+                reservedDays: ['lunes', 'miércoles', 'viernes']
+            }
+        }
+    })
+    async canReserveOnDay(
+        @Param('userId') userId: string,
+        @Param('scheduleId') scheduleId: string
+    ) {
+        return this.reservationsService.canReserveOnDay(userId, scheduleId);
+    }
+
     @UseGuards(JwtAuthGuard)
     @Post(":id")
     @ApiOperation({ summary: 'Create a new reservation' })
@@ -69,7 +93,7 @@ export class ReservationsController {
         return this.reservationsService.createReservation(userId, scheduleId);
     }
 
-    @UseGuards(AdminGuard)
+    @UseGuards(JwtAuthGuard)
     @Patch(':id')
     @ApiOperation({ summary: 'Cancel a reservation' })
     @ApiParam({ name: 'id', description: 'Reservation ID' })
@@ -86,7 +110,7 @@ export class ReservationsController {
         return this.reservationsService.cancelReservation(id, userId);
     }
 
-    @UseGuards(AdminGuard)
+    @UseGuards(JwtAuthGuard)
     @Delete(":id")
     @ApiOperation({ summary: 'Delete a reservation' })
     @ApiParam({ name: 'id', description: 'Reservation ID' })
