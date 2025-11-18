@@ -2,7 +2,7 @@ import { Controller, Post, Body, Delete, Param, BadRequestException, Get, Req, P
 import { ReservationsService } from './reservations.service';
 import { CancelReservationDto } from "./dtos/cancel-reservation.dto"
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
-import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminGuard, JwtAuthGuard } from '../auth/guards/admin.guard';
 
 @ApiTags('Reservations')
 @Controller('reservations')
@@ -43,7 +43,7 @@ export class ReservationsController {
         return this.reservationsService.getWeeklyReservationStatus(userId);
     }
 
-    @UseGuards(AdminGuard)
+    @UseGuards(JwtAuthGuard)
     @Post(":id")
     @ApiOperation({ summary: 'Create a new reservation' })
     @ApiBody({ 

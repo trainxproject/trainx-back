@@ -7,10 +7,10 @@ export class Reservation {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @ManyToOne(() => User, (user) => user.reservations)
+    @ManyToOne(() => User, (user) => user.reservations, {onDelete: "CASCADE"})
     user: User;
 
-    @ManyToOne(() => Schedule, (schedule) => schedule.reservations)
+    @ManyToOne(() => Schedule, (schedule) => schedule.reservations, {onDelete: "CASCADE"})
     schedule: Schedule;
 
     @CreateDateColumn()
