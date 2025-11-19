@@ -137,12 +137,17 @@ export class ReservationsService {
 
         await this.validateWeeklyDayLimit(userId, schedule.dayOfWeek);
 
-        const currentReservations = schedule.reservations.length;
+        const activeReservations = schedule.reservations.filter(
+            (res) => res.status === 'active'
+        ).length;
+    
         if (
-        schedule.activity.maxCapacity &&
-        currentReservations >= schedule.activity.maxCapacity
+            schedule.activity.maxCapacity &&
+            activeReservations >= schedule.activity.maxCapacity
         ) {
-        throw new BadRequestException('Full capacity');
+            throw new BadRequestException(
+                `Esta clase está llena. Cupos: ${schedule.activity.maxCapacity}, Inscritos: ${activeReservations}`
+            );
         }
 
         const reservation = this.reservationRepository.create({
