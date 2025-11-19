@@ -2,34 +2,21 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { UsersService } from '../users/users.service';
 import { PaymentsService } from 'src/payments/payments.service';
 import { SubStatus } from '../pay.enum';
-import { privateDecrypt } from 'crypto';
-import { Repository } from 'typeorm';
-import { User } from 'src/users/entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AdminService {
   
   constructor(
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
     private readonly usersService: UsersService,
     private readonly paymentsService: PaymentsService
   ) {}
 
   async seekService(searchTerm:  string) {
-    return this.userRepo
-    .createQueryBuilder("user")
-    .where("LOWER(user.name) LIKE LOWER(:searchTerm) OR LOWER(user.email) LIKE LOWER(:searchTerm)", {searchTerm: `%${searchTerm}%`})
-    .getMany()
-    
+    return this.usersService.seekService(searchTerm)
   }
 
   async filterService(status: string) {
-    return this.userRepo
-    .createQueryBuilder("user")
-    .where("LOWER(user.status) LIKE LOWER(:status)", {status: `%${status}%`})
-    .getMany()
+    return this.usersService.filterService(status)
   }
 
   async updateUserStatus(id: string, status: string) {

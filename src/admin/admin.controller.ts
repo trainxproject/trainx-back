@@ -14,7 +14,7 @@ import { AdminGuard, JwtAuthGuard } from '../auth/guards/admin.guard';
 
 @ApiTags('Admin')
 @Controller('admin')
-// @UseGuards( JwtAuthGuard, AdminGuard)
+@UseGuards( JwtAuthGuard, AdminGuard)
 @ApiBearerAuth()
 export class AdminController {
 

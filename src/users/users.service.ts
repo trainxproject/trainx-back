@@ -9,6 +9,7 @@ import { Pay } from 'src/payments/entities/payment.entity';
 
 @Injectable()
 export class UsersService {
+   
     
     constructor(
         @InjectRepository(User)
@@ -22,6 +23,19 @@ export class UsersService {
         private subscriptionRepository: Repository<Pay>
 
     ) {}
+
+    async filterService(status: string) {
+    return this.usersRepository
+    .createQueryBuilder("user")
+    .where("LOWER(user.status) LIKE LOWER(:status)", {status: `%${status}%`})
+    .getMany()
+    }
+    async seekService(searchTerm: string) {
+    return this.usersRepository
+    .createQueryBuilder("user")
+    .where("LOWER(user.name) LIKE LOWER(:searchTerm) OR LOWER(user.email) LIKE LOWER(:searchTerm)", {searchTerm: `%${searchTerm}%`})
+    .getMany()
+    }
 
     async findAll() {
         const user = await this.usersRepository.find({
