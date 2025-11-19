@@ -144,13 +144,18 @@ export class ReservationsService {
         if (!activeSub) throw new BadRequestException('You do not have an active subscription');
 
         await this.validateWeeklyDayLimit(userId, schedule.dayOfWeek);
-        
-        const currentReservations = schedule.limit;
+
+        const activeReservations = schedule.reservations.filter(
+            (res) => res.status === 'active'
+        ).length;
+    
         if (
-        schedule.activity.maxCapacity &&
-        currentReservations >= schedule.activity.maxCapacity
+            schedule.activity.maxCapacity &&
+            activeReservations >= schedule.activity.maxCapacity
         ) {
-        throw new BadRequestException('Full capacity');
+            throw new BadRequestException(
+                `Esta clase está llena. Cupos: ${schedule.activity.maxCapacity}, Inscritos: ${activeReservations}`
+            );
         }
 
         const reservation = this.reservationRepository.create({
