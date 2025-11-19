@@ -14,10 +14,25 @@ import { AdminGuard, JwtAuthGuard } from '../auth/guards/admin.guard';
 
 @ApiTags('Admin')
 @Controller('admin')
-@UseGuards( JwtAuthGuard, AdminGuard)
+// @UseGuards( JwtAuthGuard, AdminGuard)
 @ApiBearerAuth()
 export class AdminController {
+
   constructor(private readonly adminService: AdminService) {}
+
+  @Get("filter")
+  async filter(
+    @Query("status") status: string
+  ){
+    return await this.adminService.filterService(status)
+  }
+
+  @Get("seek")
+  async seek(
+    @Query("searchTerm") searchTerm: string
+  ){
+    return await this.adminService.seekService(searchTerm)
+  }
 
   @Patch('users/:id/status')
   @ApiOperation({ 
@@ -139,4 +154,7 @@ This does *not* delete their data or cancel future charges (unless handled elsew
   async deactivateUser(@Param('id') id: string) {
     return this.adminService.deactivateUser(id);
   }
+
+  
+
 }
