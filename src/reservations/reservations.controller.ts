@@ -2,7 +2,7 @@ import { Controller, Post, Body, Delete, Param, BadRequestException, Get, Req, P
 import { ReservationsService } from './reservations.service';
 import { CancelReservationDto } from "./dtos/cancel-reservation.dto"
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
-import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminGuard, JwtAuthGuard } from '../auth/guards/admin.guard';
 
 @ApiTags('Reservations')
 @Controller('reservations')
@@ -43,6 +43,7 @@ export class ReservationsController {
         return this.reservationsService.getWeeklyReservationStatus(userId);
     }
 
+
     @Get('can-reserve/:userId/:scheduleId')
     @ApiOperation({ summary: 'Check if user can reserve a specific schedule' })
     @ApiParam({ name: 'userId', description: 'User ID', type: String })
@@ -65,7 +66,7 @@ export class ReservationsController {
         return this.reservationsService.canReserveOnDay(userId, scheduleId);
     }
 
-    @UseGuards(AdminGuard)
+    @UseGuards(JwtAuthGuard)
     @Post(":id")
     @ApiOperation({ summary: 'Create a new reservation' })
     @ApiBody({ 
@@ -91,7 +92,7 @@ export class ReservationsController {
         return this.reservationsService.createReservation(userId, scheduleId);
     }
 
-    @UseGuards(AdminGuard)
+    @UseGuards(JwtAuthGuard)
     @Patch(':id')
     @ApiOperation({ summary: 'Cancel a reservation' })
     @ApiParam({ name: 'id', description: 'Reservation ID' })
@@ -108,7 +109,7 @@ export class ReservationsController {
         return this.reservationsService.cancelReservation(id, userId);
     }
 
-    @UseGuards(AdminGuard)
+    @UseGuards(JwtAuthGuard)
     @Delete(":id")
     @ApiOperation({ summary: 'Delete a reservation' })
     @ApiParam({ name: 'id', description: 'Reservation ID' })

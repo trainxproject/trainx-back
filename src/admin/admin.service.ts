@@ -1,14 +1,36 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { PaymentsService } from 'src/payments/payments.service';
 import { SubStatus } from '../pay.enum';
+import { privateDecrypt } from 'crypto';
+import { Repository } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AdminService {
+  
   constructor(
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
     private readonly usersService: UsersService,
     private readonly paymentsService: PaymentsService
   ) {}
+
+  async seekService(searchTerm:  string) {
+    return this.userRepo
+    .createQueryBuilder("user")
+    .where("LOWER(user.name) LIKE LOWER(:searchTerm) OR LOWER(user.email) LIKE LOWER(:searchTerm)", {searchTerm: `%${searchTerm}%`})
+    .getMany()
+    
+  }
+
+  async filterService(status: string) {
+    return this.userRepo
+    .createQueryBuilder("user")
+    .where("LOWER(user.status) LIKE LOWER(:status)", {status: `%${status}%`})
+    .getMany()
+  }
 
   async updateUserStatus(id: string, status: string) {
     const user = await this.usersService.findOne(id);
@@ -159,17 +181,21 @@ export class AdminService {
     };
   }
   
-  async getPlansCountByType(planType: '3_days' | '5_days') {
+   async getPlansCountByType(planType: 'week-3' | 'week-5') {
+
     const allUsers = await this.usersService.findAll();
+
+    if(!allUsers) throw new ForbiddenException("Usuario")
     
-    const count = allUsers.filter(user => 
-      user.subscription?.type === planType
-    ).length;
+    const count = allUsers.reduce((acc, allUsers) => {
+      const plan = allUsers.payment.filter(e=> e.plan === planType).length || 0;
+      return acc + plan;
+    }, 0)
   
     return {
       planType,
       count,
-      description: planType === '3_days' ? '3 días a la semana' : '5 días a la semana'
+      description: planType === 'week-3' ? '3 días a la semana' : '5 días a la semana'
     };
   }
 

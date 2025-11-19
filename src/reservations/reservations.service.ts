@@ -125,10 +125,18 @@ export class ReservationsService {
         where: { id: scheduleId },
         relations: ['activity', 'reservations'],
         });
+        
+        const reservationVerify = await this.reservationRepository.findOne({
+        where: { user: {id: user?.id} , schedule: {id: schedule?.id}},
+        });
+
+       
         if (!schedule) throw new BadRequestException('Schedule not found');
 
         if (!schedule.activity.requiresReservation)
         throw new BadRequestException('This activity does not require a reservation');
+
+        if(reservationVerify) throw new ForbiddenException("Ya has reservado esta clase")
 
         const activeSub = await this.subscriptionRepository.findOne({
         where: { user: { id: user?.id }, paid: true },
@@ -155,6 +163,9 @@ export class ReservationsService {
         schedule,
         status: 'active',
         });
+
+        
+        await this.scheduleRepository.increment({id: reservation.schedule.id} , "limit", 1)
 
         return this.reservationRepository.save(reservation);
     }
@@ -185,6 +196,7 @@ export class ReservationsService {
 
         reservation.status = 'cancelled';
         await this.reservationRepository.save(reservation);
+        await this.scheduleRepository.decrement({id: reservation.schedule.id} , "limit", 1)
 
         return { message: 'Reservation successfully cancelled', reservation };
     }
@@ -203,7 +215,7 @@ export class ReservationsService {
 
         if(!reservation) throw new NotFoundException("Reservation not exist")
 
-        if(reservation?.status === "active") throw new ForbiddenException("You cannot delete a reservation that you have not canceled")
+        if(reservation?.status === "active") throw new ForbiddenException("You cannot delete a reservation that you have not cancelled")
 
         return await this.reservationRepository.remove(reservation)    
     }

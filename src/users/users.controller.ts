@@ -4,7 +4,7 @@ import { User } from './entities/user.entity';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { AssignTrainerDto } from './dtos/assign-trainer.dto';
 import { UpdateNameDto } from './dtos/update-name.dto';
-import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminGuard, JwtAuthGuard } from '../auth/guards/admin.guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -88,7 +88,7 @@ export class UsersController {
     }
 
     @Patch(':id/trainer')
-    @UseGuards(AdminGuard)
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Assign a trainer to the user (only if they have an active subscription)' })
     @ApiParam({ name: 'id', description: 'User ID to assign trainer to', type: String })
     @ApiBody({ type: AssignTrainerDto })

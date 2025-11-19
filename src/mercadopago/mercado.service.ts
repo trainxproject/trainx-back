@@ -65,9 +65,9 @@ export class MpService {
                 }
             ],
                 back_urls: {
-                    success: 'https://56vtzh7b-3000.brs.devtunnels.ms/mp/success',
-                    failure: 'https://56vtzh7b-3000.brs.devtunnels.ms/mp/failure',
-                    pending: 'https://56vtzh7b-3000.brs.devtunnels.ms/mp/pending',
+                    success: 'https://trainx.onrender.com/mp/success',
+                    failure: 'https://trainx.onrender.com/mp/failure',
+                    pending: 'https://trainx.onrender.com/mp/pending',
                 },
                 notification_url: `${process.env.WEBHOOK_URL}?token=${process.env.WEBHOOK_TOKEN}`,
                 external_reference: user?.id

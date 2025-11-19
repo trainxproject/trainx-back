@@ -16,6 +16,7 @@ import { TrainersModule } from './trainers/trainers.module';
 import { PlanModule } from './plans/plan.module';
 import { MercadoPagoModule } from './mercadopago/mercado.module';
 import { TrainerSeeder } from './trainers/trainer.seeder';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 
 @Module({
   imports: [
@@ -25,7 +26,9 @@ import { TrainerSeeder } from './trainers/trainer.seeder';
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => {
+       
+      return {
         type: "postgres",
         database: configService.get("DB_NAME"),
         host: configService.get("DB_HOST"),
@@ -33,8 +36,11 @@ import { TrainerSeeder } from './trainers/trainer.seeder';
         username: configService.get("DB_USERNAME"),
         password: configService.get("DB_PASSWORD") as string,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true
-      })
+        synchronize: true,
+        logging: true
+      }
+      }
+       
     }),
     UsersModule,
     SubscriptionsModule,
@@ -48,9 +54,12 @@ import { TrainerSeeder } from './trainers/trainer.seeder';
     ReservationsModule,
     TrainersModule,
     PlanModule,
-    MercadoPagoModule
+    MercadoPagoModule,
+    MaintenanceModule
   ],
 })
+
+
 export class AppModule implements OnApplicationBootstrap {
 
   constructor(

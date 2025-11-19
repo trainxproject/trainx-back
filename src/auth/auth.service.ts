@@ -61,7 +61,7 @@ export class AuthService {
     const matches = await bcrypt.compare(password, user.password);
     if (!matches) throw new UnauthorizedException('Credenciales inválidas');
 
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, isAdmin: user.isAdmin };
     return {
       access_token: this.jwtService.sign(payload),
       user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, profilePicture: user.profilePicture},
@@ -89,13 +89,14 @@ export class AuthService {
         profilePicture: profile.picture
       });
     }
-
+    
     await this.notificationService.sendWelcome({
       email: user.email,
       name: user.name
     })
-  
-    const payload = { sub: user.id, email: user.email, name: user.name, profilePicture: user.profilePicture };
+    
+    const payload = { sub: user.id, email: user.email, name: user.name, profilePicture: user.profilePicture, isAdmin: user.isAdmin };
+
     return this.jwtService.sign(payload);
   }
 }

@@ -65,7 +65,8 @@ export class MpController {
     @ApiOperation({ summary: "Success redirection after payment approval" })
     @ApiResponse({ status: 302, description: "Redirects user after successful payment" })
     handleSuccess(@Res() res: any) {
-        return res.redirect("https://56vtzh7b-3001.brs.devtunnels.ms/dashboard/user");
+        return res.redirect("https://trainx-front.vercel.app/dashboard/user")
+
     }
 
     @Get('failure')

@@ -10,14 +10,29 @@ import {
   ApiQuery, 
   ApiBearerAuth
 } from '@nestjs/swagger';
-import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminGuard, JwtAuthGuard } from '../auth/guards/admin.guard';
 
 @ApiTags('Admin')
 @Controller('admin')
-@UseGuards(AdminGuard)
+// @UseGuards( JwtAuthGuard, AdminGuard)
 @ApiBearerAuth()
 export class AdminController {
+
   constructor(private readonly adminService: AdminService) {}
+
+  @Get("filter")
+  async filter(
+    @Query("status") status: string
+  ){
+    return await this.adminService.filterService(status)
+  }
+
+  @Get("seek")
+  async seek(
+    @Query("searchTerm") searchTerm: string
+  ){
+    return await this.adminService.seekService(searchTerm)
+  }
 
   @Patch('users/:id/status')
   @ApiOperation({ 
@@ -95,24 +110,24 @@ Useful for financial dashboards and business analytics.`
     return this.adminService.getMonthlyRevenue();
   }
 
-  @Get('statistics/plans/3-days')
+  @Get('statistics/plans/week-3')
   @ApiOperation({ 
     summary: 'Count of purchased 3-day plans',
     description: 'Returns how many 3-day subscription plans have been purchased by users.'
   })
   @ApiResponse({ status: 200, description: 'Count of 3-day plans returned successfully.' })
   async get3DaysPlansCount() {
-    return this.adminService.getPlansCountByType('3_days');
+    return this.adminService.getPlansCountByType('week-3');
   }
 
-  @Get('statistics/plans/5-days')
+  @Get('statistics/plans/week-5')
   @ApiOperation({ 
     summary: 'Count of purchased 5-day plans',
     description: 'Returns how many 5-day subscription plans have been purchased by users.'
   })
   @ApiResponse({ status: 200, description: 'Count of 5-day plans returned successfully.' })
   async get5DaysPlansCount() {
-    return this.adminService.getPlansCountByType('5_days');
+    return this.adminService.getPlansCountByType('week-5');
   }
 
   @Patch('users/:id/activate')
@@ -139,4 +154,7 @@ This does *not* delete their data or cancel future charges (unless handled elsew
   async deactivateUser(@Param('id') id: string) {
     return this.adminService.deactivateUser(id);
   }
+
+  
+
 }
