@@ -51,7 +51,7 @@ export class User {
     @Column({ default: false })
     hasPaid: boolean;
 
-    @ManyToOne(() => Trainer, { nullable: true })
+    @ManyToOne(() => Trainer, { nullable: true, onDelete: "SET NULL"})
     @JoinColumn({ name: 'trainerId' })
     trainer?: Trainer;
 
