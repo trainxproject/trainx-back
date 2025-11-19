@@ -33,9 +33,20 @@ export class TrainersService {
 
   async create(data: CreateTrainerDto) {
 
-    const createTrainers = this.trainersRepository.create(data)
-    
-    return await this.trainersRepository.save(createTrainers)
+    if (!data.imageUrl) {
+      throw new BadRequestException('imageUrl es requerido');
+  }
+
+  const trainer = this.trainersRepository.create({
+      name: data.name,
+      specialization: data.specialization,
+      formation: data.formation,
+      imageUrl: data.imageUrl,
+      available: data.available ?? true,
+      qualification: 0
+  });
+
+  return await this.trainersRepository.save(trainer);
   }
 
   async createQuali(idTrainer: string, idUser: any, rating:number) {
