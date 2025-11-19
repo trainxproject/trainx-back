@@ -44,7 +44,6 @@ export class ReservationsController {
     }
 
 
-    @UseGuards(JwtAuthGuard)
     @Get('can-reserve/:userId/:scheduleId')
     @ApiOperation({ summary: 'Check if user can reserve a specific schedule' })
     @ApiParam({ name: 'userId', description: 'User ID', type: String })

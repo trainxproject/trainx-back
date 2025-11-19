@@ -20,12 +20,16 @@ export class AdminService {
   async seekService(searchTerm:  string) {
     return this.userRepo
     .createQueryBuilder("user")
-    .where("LOWER(user.name) LIKE LOWER(:user.name) OR LOWER(user.email) LIKE LOWER(:user.email)", {seek: `%${searchTerm}%`})
+    .where("LOWER(user.name) LIKE LOWER(:searchTerm) OR LOWER(user.email) LIKE LOWER(:searchTerm)", {searchTerm: `%${searchTerm}%`})
     .getMany()
+    
   }
 
-  async filterService() {
-    
+  async filterService(status: string) {
+    return this.userRepo
+    .createQueryBuilder("user")
+    .where("LOWER(user.status) LIKE LOWER(:status)", {status: `%${status}%`})
+    .getMany()
   }
 
   async updateUserStatus(id: string, status: string) {

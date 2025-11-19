@@ -14,20 +14,22 @@ import { AdminGuard, JwtAuthGuard } from '../auth/guards/admin.guard';
 
 @ApiTags('Admin')
 @Controller('admin')
-@UseGuards( JwtAuthGuard, AdminGuard)
+// @UseGuards( JwtAuthGuard, AdminGuard)
 @ApiBearerAuth()
 export class AdminController {
 
   constructor(private readonly adminService: AdminService) {}
 
-  @Get()
-  async filter(){
-    return await this.adminService.filterService()
+  @Get("filter")
+  async filter(
+    @Query("status") status: string
+  ){
+    return await this.adminService.filterService(status)
   }
 
-  @Get()
+  @Get("seek")
   async seek(
-    @Query("name") searchTerm: string
+    @Query("searchTerm") searchTerm: string
   ){
     return await this.adminService.seekService(searchTerm)
   }
