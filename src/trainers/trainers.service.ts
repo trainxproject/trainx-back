@@ -89,6 +89,11 @@ export class TrainersService {
     const trainer = await this.trainersRepository.findOne({where: {id: id}})
     if(!trainer) throw new NotFoundException("Entrenador no encontrado")
 
+    await this.userRepository.update(
+      {trainer: {id: trainer.id}},
+      {trainer: null as any}
+    )  
+
     return await this.trainersRepository.remove(trainer)
   }
 
