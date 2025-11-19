@@ -2,13 +2,21 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { UsersService } from '../users/users.service';
 import { PaymentsService } from 'src/payments/payments.service';
 import { SubStatus } from '../pay.enum';
+import { privateDecrypt } from 'crypto';
+import { Between, Repository } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Pay } from '../payments/entities/payment.entity';
+
 
 @Injectable()
 export class AdminService {
   
   constructor(
     private readonly usersService: UsersService,
-    private readonly paymentsService: PaymentsService
+    private readonly paymentsService: PaymentsService,
+    @InjectRepository(Pay)
+    private readonly paymentsRepository: Repository<Pay>
   ) {}
 
   async seekService(searchTerm:  string) {
@@ -146,29 +154,39 @@ export class AdminService {
           totalReservations: user.reservations?.length || 0,
           activeReservations: activeReservations.length,
           hasPaid: user.hasPaid,
-          hasActivePlan: hasActivePlan, // ✅ Indica si tiene plan activo
+          hasActivePlan: hasActivePlan, // Indica si tiene plan activo
         }
       };
     });
   }
 
   async getMonthlyRevenue() {
-    const allUsers = await this.usersService.findAll();
-    
-    const totalRevenue = allUsers
-      .filter(user => user.subscription?.isActive)
-      .reduce((sum, user) => {
-        return sum + Number(user.subscription.amount);
-      }, 0);
-  
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const firstDayOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    const payments = await this.paymentsRepository.find({
+      where: {
+        status: SubStatus.ACTIVE,
+        paid: true,
+        isSubscription: true,
+        createdAt: Between(firstDayOfMonth, firstDayOfNextMonth),
+      },
+    });
+
+    const totalRevenue = payments.reduce((sum, payment) => {
+      return sum + Number(payment.amount);
+    }, 0);
+
     return {
       totalMonthlyRevenue: totalRevenue,
       currency: 'ARS',
-      activeSubscriptions: allUsers.filter(u => u.subscription?.isActive).length
+      activeSubscriptions: payments.length,
+      month: now.toLocaleString('es-AR', { month: 'long', year: 'numeric' }),
     };
   }
   
-   async getPlansCountByType(planType: 'week-3' | 'week-5') {
+  async getPlansCountByType(planType: 'week-3' | 'week-5') {
 
     const allUsers = await this.usersService.findAll();
 

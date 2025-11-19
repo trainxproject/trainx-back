@@ -11,9 +11,8 @@ export class CreateTrainerDto {
     @IsString()
     formation?: string;
 
-    @IsOptional()
     @IsString()
-    imageUrl?: string;
+    imageUrl: string;
 
     @IsOptional()
     @IsBoolean()
