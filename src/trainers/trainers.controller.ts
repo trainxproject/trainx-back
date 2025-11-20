@@ -30,7 +30,7 @@ export class TrainersController {
   }
 
   @Post(":id")
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Rate a trainer' })
   @ApiParam({ name: 'id', description: 'Trainer ID' })
   @ApiBody({
