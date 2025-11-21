@@ -7,7 +7,6 @@
 
 
 
-
     export enum PlansEnum {
         WEEK3 = "week-3",
         WEEK5 = "week-5" 

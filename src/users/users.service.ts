@@ -6,6 +6,7 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Trainer } from '../trainers/entities/trainer.entity';
 import { Plan } from 'src/plans/plan.entity';
 import { Pay } from 'src/payments/entities/payment.entity';
+import { UserEnum } from 'src/user.enum';
 
 @Injectable()
 export class UsersService {
@@ -24,15 +25,21 @@ export class UsersService {
 
     ) {}
 
-    async filterService(status: string) {
+    async filterService(status: UserEnum) {
     return this.usersRepository
     .createQueryBuilder("user")
-    .where("LOWER(user.status) LIKE LOWER(:status)", {status: `%${status}%`})
+    .leftJoinAndSelect("user.trainer", "trainer")
+    .leftJoinAndSelect("user.payments", "payments")
+    .where("user.status = :status", {status})
     .getMany()
     }
+
+
     async seekService(searchTerm: string) {
     return this.usersRepository
     .createQueryBuilder("user")
+    .leftJoinAndSelect("user.trainer", "trainer")
+    .leftJoinAndSelect("user.payments", "payments")
     .where("LOWER(user.name) LIKE LOWER(:searchTerm) OR LOWER(user.email) LIKE LOWER(:searchTerm)", {searchTerm: `%${searchTerm}%`})
     .getMany()
     }
@@ -123,11 +130,21 @@ export class UsersService {
 
     async assignTrainer(id:string, userId: string) {
 
+        const trainer = await this.trainersRepository.findOne({ where: { id: id , }  });
+
+        if (!trainer) throw new NotFoundException('Entrenador no encontrado');
+    
+        if (!trainer.available) {
+            throw new BadRequestException('El entrenador no está disponible');
+        }
+
         const user = await this.usersRepository.findOne({
             where: { id: userId },
             relations: ['trainer', 'payments'],
         });
         if (!user) throw new NotFoundException('Usuario no encontrado');
+        
+        if (user.trainer) throw new NotFoundException('Ya tienes un entrenador asignado');
 
         const pay = await this.subscriptionRepository.findOne({
             where: { user: {id: user.id} },
@@ -146,13 +163,8 @@ export class UsersService {
             throw new ForbiddenException("Tu plan de 3 días a la semana no permite incluye un entrenador personal. Por favor, actualiza tu plan al de 5 días para acceder a esta funcionalidad.");
         }
 
-        const trainer = await this.trainersRepository.findOne({ where: { id: id } });
-        if (!trainer) throw new NotFoundException('Entrenador no encontrado');
-    
-        if (!trainer.available) {
-            throw new BadRequestException('El entrenador no está disponible');
-        }
-    
+        
+
         user.trainer = trainer;
         await this.usersRepository.save(user);
     
