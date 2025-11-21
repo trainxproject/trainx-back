@@ -144,7 +144,7 @@ export class UsersService {
         });
         if (!user) throw new NotFoundException('Usuario no encontrado');
         
-        if (user.trainer) throw new NotFoundException('Ya tienes un entrenador asignado');
+        if (user.trainer) throw new BadRequestException('Ya tienes un entrenador asignado');
 
         const pay = await this.subscriptionRepository.findOne({
             where: { user: {id: user.id} },
