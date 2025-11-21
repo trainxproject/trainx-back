@@ -15,7 +15,7 @@ import { UserEnum } from 'src/user.enum';
 
 @ApiTags('Admin')
 @Controller('admin')
-// @UseGuards( JwtAuthGuard, AdminGuard)
+@UseGuards( JwtAuthGuard, AdminGuard)
 @ApiBearerAuth()
 export class AdminController {
 
