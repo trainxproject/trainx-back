@@ -26,22 +26,52 @@ export class UsersService {
     ) {}
 
     async filterService(status: UserEnum) {
-    return this.usersRepository
+    const filter = await  this.usersRepository
     .createQueryBuilder("user")
     .leftJoinAndSelect("user.trainer", "trainer")
     .leftJoinAndSelect("user.payments", "payments")
     .where("user.status = :status", {status})
     .getMany()
+    
+    return filter.map((u) => ({
+        id: u.id,
+        name: u?.name,
+        email: u?.email,
+        status: u?.status,
+        role: u?.role,
+        hasPaid: u?.hasPaid,
+        trainer: u?.trainer?.name, 
+        subscription: u.subscription,
+        payment: u.payments.map((e) => ({
+            plan: e.billingCycle,
+            status: e.status
+        }))
+    }));
     }
 
 
     async seekService(searchTerm: string) {
-    return this.usersRepository
+    const seek = await  this.usersRepository
     .createQueryBuilder("user")
     .leftJoinAndSelect("user.trainer", "trainer")
     .leftJoinAndSelect("user.payments", "payments")
     .where("LOWER(user.name) LIKE LOWER(:searchTerm) OR LOWER(user.email) LIKE LOWER(:searchTerm)", {searchTerm: `%${searchTerm}%`})
     .getMany()
+
+     return seek.map((u) => ({
+        id: u.id,
+        name: u?.name,
+        email: u?.email,
+        status: u?.status,
+        role: u?.role,
+        hasPaid: u?.hasPaid,
+        trainer: u?.trainer?.name, 
+        subscription: u.subscription,
+        payment: u.payments.map((e) => ({
+            plan: e.billingCycle,
+            status: e.status
+        }))
+    }));
     }
 
     async findAll() {
