@@ -11,6 +11,7 @@ import {
   ApiBearerAuth
 } from '@nestjs/swagger';
 import { AdminGuard, JwtAuthGuard } from '../auth/guards/admin.guard';
+import { UserEnum } from 'src/user.enum';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -22,7 +23,7 @@ export class AdminController {
 
   @Get("filter")
   async filter(
-    @Query("status") status: string
+    @Query("status") status: UserEnum
   ){
     return await this.adminService.filterService(status)
   }
@@ -52,8 +53,10 @@ This endpoint is typically used by administrators to manage user access or subsc
   @ApiResponse({ status: 200, description: 'User status updated successfully and returns updated user data.' })
   @ApiResponse({ status: 400, description: 'Invalid user ID or invalid status value.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  updateUserStatus(@Param('id') id: string, @Body() dto: UpdateUserStatusDto) {
-    return this.adminService.updateUserStatus(id, dto.status);
+  updateUserStatus(
+    @Param('id') id: string, 
+    @Body("status") status: UserEnum) {
+    return this.adminService.updateUserStatus(id, status);
   }
 
   @Get('payments')
