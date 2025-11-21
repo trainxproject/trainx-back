@@ -3,7 +3,7 @@ import { UsersService } from '../users/users.service';
 import { PaymentsService } from 'src/payments/payments.service';
 import { SubStatus } from '../pay.enum';
 import { privateDecrypt } from 'crypto';
-import { Between, Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Pay } from '../payments/entities/payment.entity';
@@ -163,15 +163,16 @@ export class AdminService {
 
   async getMonthlyRevenue() {
     const now = new Date();
+    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const firstDayOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
     const payments = await this.paymentsRepository.find({
       where: {
         status: SubStatus.ACTIVE,
         paid: true,
         isSubscription: true,
-        createdAt: Between(firstDayOfMonth, firstDayOfNextMonth),
+        startsAt: LessThanOrEqual(lastDayOfMonth),
+        endsAt: MoreThanOrEqual(firstDayOfMonth),
       },
     });
 
