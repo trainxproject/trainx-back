@@ -7,6 +7,7 @@ import { Between, Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Pay } from '../payments/entities/payment.entity';
+import { UserEnum } from 'src/user.enum';
 
 
 @Injectable()
@@ -23,11 +24,11 @@ export class AdminService {
     return this.usersService.seekService(searchTerm)
   }
 
-  async filterService(status: string) {
+  async filterService(status: UserEnum) {
     return this.usersService.filterService(status)
   }
 
-  async updateUserStatus(id: string, status: string) {
+  async updateUserStatus(id: string, status: UserEnum) {
     const user = await this.usersService.findOne(id);
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
@@ -44,7 +45,7 @@ export class AdminService {
     // Total de usuarios
     const allUsers = await this.usersService.findAll();
     const totalUsers = allUsers.length;
-    const activeUsers = allUsers.filter(u => u.status === 'activo').length;
+    const activeUsers = allUsers.filter(u => u.status === UserEnum.ACTIVE).length;
   
     // Total de pagos
     const allPayments = await this.paymentsService.findAll();
@@ -207,14 +208,14 @@ export class AdminService {
   async activateUser(id: string) {
     const user = await this.usersService.findOne(id);
     if (!user) throw new NotFoundException('Usuario no encontrado');
-    user.status = 'active';
+    user.status = UserEnum.ACTIVE;
     return await this.usersService.saveStatus(user);
   }
   
   async deactivateUser(id: string) {
     const user = await this.usersService.findOne(id);
     if (!user) throw new NotFoundException('Usuario no encontrado');
-    user.status = 'inactive';
+    user.status = UserEnum.INACTIVE;
     return await this.usersService.saveStatus(user);
   }
 }

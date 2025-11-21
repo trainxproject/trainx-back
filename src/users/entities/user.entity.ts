@@ -5,6 +5,7 @@ import { Reservation } from '../../reservations/entities/reservation.entity';
 import { Trainer } from '../../trainers/entities/trainer.entity';
 import { TrainerQualification } from 'src/trainers/entities/qualification.entity';
 import { UserRole } from '../../auth/roles.enum';
+import { UserEnum } from 'src/user.enum';
 
 @Entity({
     name: "users"
@@ -26,8 +27,11 @@ export class User {
     @Column({ nullable: true })
     profilePicture: string;
 
-    @Column({ default: 'active' })
-    status: string;
+    @Column({ 
+        type: "enum",
+        enum: Object.values(UserEnum),
+        default: UserEnum.ACTIVE })
+    status: UserEnum;
 
     @Column({default: false})
     isAdmin: boolean
