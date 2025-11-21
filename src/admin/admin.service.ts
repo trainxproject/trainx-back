@@ -162,19 +162,22 @@ export class AdminService {
   }
 
   async getMonthlyRevenue() {
-    const now = new Date();
-    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    // const now = new Date();
+    // const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    // const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const payments = await this.paymentsRepository.find({
       where: {
         status: SubStatus.ACTIVE,
         paid: true,
         isSubscription: true,
-        startsAt: LessThanOrEqual(lastDayOfMonth),
-        endsAt: MoreThanOrEqual(firstDayOfMonth),
+        // startsAt: LessThanOrEqual(lastDayOfMonth),
+        // endsAt: MoreThanOrEqual(firstDayOfMonth),
       },
     });
+
+    // console.log('Pagos encontrados:', payments.length); // Para debug
+    // console.log('Fechas:', { firstDayOfMonth, lastDayOfMonth });
 
     const totalRevenue = payments.reduce((sum, payment) => {
       return sum + Number(payment.amount);
@@ -184,7 +187,7 @@ export class AdminService {
       totalMonthlyRevenue: totalRevenue,
       currency: 'ARS',
       activeSubscriptions: payments.length,
-      month: now.toLocaleString('es-AR', { month: 'long', year: 'numeric' }),
+      // month: now.toLocaleString('es-AR', { month: 'long', year: 'numeric' }),
     };
   }
   
