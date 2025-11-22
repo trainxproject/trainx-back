@@ -72,16 +72,16 @@ export class MpController {
     @ApiOperation({ summary: "Response for failed payments" })
     @ApiQuery({ name: "data", required: false, description: "Query params returned by Mercado Pago" })
     @ApiResponse({ status: 200, description: "Payment failed response" })
-    handleFailure(@Query() query: any) {
-        return { message: 'Payment rejected ❌', data: query };
+    handleFailure(@Res() res: any) {
+        return res.redirect("https://trainx-front.vercel.app/dashboard/user")
     }
 
     @Get('pending')
     @ApiOperation({ summary: "Response for pending payments" })
     @ApiQuery({ name: "data", required: false, description: "Query params returned by Mercado Pago" })
     @ApiResponse({ status: 200, description: "Payment pending response" })
-    handlePending(@Query() query: any) {
-        return { message: 'Payment pending ⏳', data: query };
+    handlePending(@Res() res: any) {
+        return res.redirect("https://trainx-front.vercel.app/dashboard/user")
     }
 
 }
