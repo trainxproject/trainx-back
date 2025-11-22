@@ -52,9 +52,7 @@ export class AuthController {
   @ApiResponse({ status: 302, description: 'Redirects the user to frontend with JWT token.' })
   async googleCallback(@Req() req: Request, @Res() res: Response) {
     const user = req.user;
-    console.log(req.user
 
-    )
     const jwt = await this.authService.validateGoogleUser(user);
     return res.redirect(`https://trainx-front.vercel.app?token=${jwt}`);
   }

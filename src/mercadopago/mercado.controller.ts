@@ -36,7 +36,6 @@ export class MpController {
     @ApiQuery({ name: "id", required: false, description: "ID of the resource notified" })
     @ApiResponse({ status: 200, description: "Webhook successfully processed" })
     async notification(@Body() body: any, @Query() query: any) {
-        console.log('🔔 Webhook received:', body, query);
 
         const topic =
             query.topic ||

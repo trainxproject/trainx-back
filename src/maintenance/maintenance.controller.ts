@@ -71,7 +71,6 @@ export class MaintenanceController {
   })
   async getStatus() {
     const isActive = await this.maintenanceService.getStatus();
-    console.log('GET /maintenance -> isActive:', isActive);
     if (isActive) {
       return { active: isActive, message: 'Sistema en mantenimiento' };
     } else {

@@ -174,10 +174,7 @@ export class AdminService {
         endsAt: MoreThanOrEqual(firstDayOfMonth),
       },
     });
-
-    console.log('Pagos encontrados:', payments.length); // Para debug
-    console.log('Fechas:', { firstDayOfMonth, lastDayOfMonth });
-
+    
     const totalRevenue = payments.reduce((sum, payment) => {
       return sum + Number(payment.amount);
     }, 0);

@@ -78,8 +78,7 @@ export class MpService {
         return result
     
         } catch (error: any) {
-    
-        console.error('❌ Error creando preferencia MP:', error);
+
         throw new ConflictException(`No se pudo crear el pago: ${error.message}`);
     }
     }
@@ -89,8 +88,6 @@ export class MpService {
         const myPayment = new Payment(this.client)
         const payResponse = await myPayment.get({id: id})
         const pay = payResponse; 
-
-        console.log('📦 Pago verificado:', pay);
 
         const existingPayment = await this.paymentRepo.findOne({
             where: {MpPaymentId: String(pay.id)}
@@ -125,7 +122,6 @@ export class MpService {
             userObj.email, userObj.name)
 
             await this.paymentRepo.save(newOrder)
-            console.log('💾 Nuevo pago guardado:', newOrder);
 
         } else {
 
@@ -141,11 +137,6 @@ export class MpService {
             }
 
             await this.paymentRepo.update(existingPayment.id, updatedFields)
-
-            console.log('🔁 Pago actualizado:', {
-                id: existingPayment.id,
-                ...updatedFields
-        });
         }
     }
 
@@ -153,8 +144,6 @@ export class MpService {
             
             const approval = new MerchantOrder(this.client)
             const order = await approval.get({merchantOrderId: id})
-
-              console.log('🛒 Merchant Order verificada:', order);
 
             // if(!order.id) throw new NotFoundException("Subscription not found")
 
